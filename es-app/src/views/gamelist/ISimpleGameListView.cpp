@@ -76,10 +76,10 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 		{
 			if(mCursorStack.size())
 			{
+				Sound::getFromTheme(getTheme(), getName(), "back")->play();
 				populateList(mCursorStack.top()->getParent()->getChildren());
 				setCursor(mCursorStack.top());
 				mCursorStack.pop();
-				Sound::getFromTheme(getTheme(), getName(), "back")->play();
 			}else{
 				onFocusLost();
 				ViewController::get()->goToSystemView(getCursor()->getSystem());
@@ -90,6 +90,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect"))
 			{
+				Sound::getFromTheme(getTheme(), getName(), "switch")->play();
 				onFocusLost();
 				ViewController::get()->goToNextGameList();
 				return true;
@@ -98,6 +99,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect"))
 			{
+				Sound::getFromTheme(getTheme(), getName(), "switch")->play();
 				onFocusLost();
 				ViewController::get()->goToPrevGameList();
 				return true;

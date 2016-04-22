@@ -1,0 +1,109 @@
+project("gme")
+
+set(GME_HEADERS
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ay_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ay_Cpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ay_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/blargg_common.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/blargg_config.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/blargg_endian.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/blargg_source.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Blip_Buffer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Classic_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Data_Reader.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Dual_Resampler.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Effects_Buffer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Fir_Resampler.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gb_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gb_Cpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/gb_cpu_io.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gb_Oscs.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gbs_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/gme.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gme_File.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gym_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Hes_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Hes_Cpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/hes_cpu_io.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Hes_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Kss_Cpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Kss_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Kss_Scc_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/M3u_Playlist.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Multi_Buffer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Music_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Cpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_cpu_io.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Fme7_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Namco_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Oscs.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Vrc6_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nsf_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nsfe_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sap_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sap_Cpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/sap_cpu_io.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sap_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sms_Apu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sms_Oscs.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Snes_Spc.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Spc_Cpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Spc_Dsp.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Spc_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Vgm_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Vgm_Emu_Impl.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ym2413_Emu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ym2612_Emu.h
+)
+
+set(GME_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ay_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ay_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ay_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Blip_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Classic_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Data_Reader.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Dual_Resampler.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Effects_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Fir_Resampler.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gb_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gb_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gb_Oscs.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gbs_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/gme.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gme_File.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gym_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Hes_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Hes_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Hes_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Kss_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Kss_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Kss_Scc_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/M3u_Playlist.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Multi_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Music_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Fme7_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Namco_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Oscs.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nes_Vrc6_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nsf_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Nsfe_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sap_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sap_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sap_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Sms_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Snes_Spc.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Spc_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Spc_Dsp.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Spc_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Vgm_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Vgm_Emu_Impl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ym2413_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Ym2612_Emu.cpp
+)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+add_library(gme STATIC ${GME_SOURCES} ${GME_HEADERS})

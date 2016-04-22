@@ -77,11 +77,17 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 			s->addWithLabel("SYSTEM VOLUME", volume);
 			s->addSaveFunc([volume] { VolumeControl::getInstance()->setVolume((int)round(volume->getValue())); });
 			
-			// disable sounds
+			// toggle sounds
 			auto sounds_enabled = std::make_shared<SwitchComponent>(mWindow);
 			sounds_enabled->setState(Settings::getInstance()->getBool("EnableSounds"));
 			s->addWithLabel("ENABLE SOUNDS", sounds_enabled);
 			s->addSaveFunc([sounds_enabled] { Settings::getInstance()->setBool("EnableSounds", sounds_enabled->getState()); });
+			
+			// toggle BGM
+			auto music_enabled = std::make_shared<SwitchComponent>(mWindow);
+			music_enabled->setState(Settings::getInstance()->getBool("EnableBGM"));
+			s->addWithLabel("ENABLE MUSIC", music_enabled);
+			s->addSaveFunc([music_enabled] { Settings::getInstance()->setBool("EnableBGM", music_enabled->getState()); });
 
 			mWindow->pushGui(s);
 	});

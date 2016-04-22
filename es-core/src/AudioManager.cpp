@@ -3,6 +3,9 @@
 #include <SDL.h>
 #include "Log.h"
 
+#include "gme/Music_Emu.h"
+#include "gme/blargg_source.h"
+
 std::vector<std::shared_ptr<Sound>> AudioManager::sSoundVector;
 SDL_AudioSpec AudioManager::sAudioFormat;
 std::shared_ptr<AudioManager> AudioManager::sInstance;

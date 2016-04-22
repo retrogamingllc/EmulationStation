@@ -150,6 +150,7 @@ set(COMMON_LIBRARIES
     ${CURL_LIBRARIES}
     pugixml
     nanosvg
+	gme
 )
 
 #add ALSA for Linux
