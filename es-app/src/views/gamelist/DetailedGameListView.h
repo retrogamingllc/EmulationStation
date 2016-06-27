@@ -41,4 +41,6 @@ private:
 
 	ScrollableContainer mDescContainer;
 	TextComponent mDescription;
+
+    std::string mThemeFolder;
 };

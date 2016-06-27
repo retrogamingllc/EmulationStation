@@ -192,8 +192,13 @@ void DetailedGameListView::updateInfoPanel()
 		mDescription.setText(file->metadata.get("desc"));
 		mDescContainer.reset();
 
+        mThemeFolder = file->medatadata.get("theme");
+
 		if(file->getType() == GAME)
 		{
+            if(!empty(mThemeFolder)){
+                //TODO set theme
+            }
 			mRating.setValue(file->metadata.get("rating"));
 			mReleaseDate.setValue(file->metadata.get("releasedate"));
 			mDeveloper.setValue(file->metadata.get("developer"));

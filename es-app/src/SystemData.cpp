@@ -118,6 +118,11 @@ void SystemData::launchGame(Window* window, FileData* game)
 	const std::string basename = game->getPath().stem().string();
 	const std::string rom_raw = fs::path(game->getPath()).make_preferred().string();
 
+    //if command is set per game use it
+    if(!game->metadata.get("command").empty()){
+        command = game->metadata.get("command");
+    }
+
 	command = strreplace(command, "%ROM%", rom);
 	command = strreplace(command, "%BASENAME%", basename);
 	command = strreplace(command, "%ROM_RAW%", rom_raw);
