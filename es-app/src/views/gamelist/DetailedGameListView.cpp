@@ -192,9 +192,24 @@ void DetailedGameListView::updateInfoPanel()
         mThemeFolder = file->metadata.get("theme");
 
         if(file->getType() == GAME) {
-            //if(!empty(mThemeFolder)){  //gets error empty not declared in this scope
+            if(!mThemeFolder.empty()){
+                std::string path = ThemeData::getThemeFromCurrentSet(mThemeFolder).generic_string();
+
+                if(boost::filesystem::exists(path)) {
+
+                    try {
+                        mTheme = std::make_shared<ThemeData>();
+                        mTheme->loadFile(path);
+                        IGameListView::setTheme(mTheme);
+                    } catch(ThemeException& e) {
+                        LOG(LogError) << e.what();
+
+                    }
+
+                }
+
             //TODO set theme
-            //}
+            }
             mRating.setValue(file->metadata.get("rating"));
             mReleaseDate.setValue(file->metadata.get("releasedate"));
             mDeveloper.setValue(file->metadata.get("developer"));

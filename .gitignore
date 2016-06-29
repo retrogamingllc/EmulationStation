@@ -1,3 +1,6 @@
+# Editor Temp Files
+*.swp
+
 # Compiled Object files
 *.slo
 *.lo
