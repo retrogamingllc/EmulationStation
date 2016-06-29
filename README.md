@@ -1,7 +1,7 @@
-E-Station3
+EStation3
 ================
 
-A cross-platform graphical front-end for emulators with controller navigation.  E-Station3 is a fork from Aloshi's EmulationStation (as has been updaed from the RetroPie folks).  Currently no websites or binaries are available, but would welcome anyone offering to help
+A cross-platform graphical front-end for emulators with controller navigation.  EStation3 is a fork from Aloshi's EmulationStation (as has been updaed from the RetroPie folks).  Currently no websites or binaries are available, but would welcome anyone offering to help
 
 **Raspberry Pi users:**
 A cool guy named petrockblog made a script which automatically installs many emulators and ES. It also includes options for configuring your RPi and setting it up to boot directly into ES. You can find it here: https://github.com/petrockblog/RetroPie-Setup
@@ -15,9 +15,9 @@ Currently no pre-compiled versions available, but you can check out the older ve
 I found a bug! I have a problem!
 ================================
 
-- First, try to check the [issue list](https://github.com/dissolve/e-station3/issues?state=open) for some entries that might match your problem.  Make sure to check closed issues too!
+- First, try to check the [issue list](https://github.com/dissolve/EStation3/issues?state=open) for some entries that might match your problem.  Make sure to check closed issues too!
 
-- If you're running E-Station on a on Raspberry Pi and have problems with config file changes not taking effect, content missing after editing, etc., check if your SD card is corrupted (see issues [#78](https://github.com/Aloshi/EmulationStation/issues/78) and [#107](https://github.com/Aloshi/EmulationStation/issues/107)). You can do this with free tools like [h2testw](http://www.heise.de/download/h2testw.html) or [F3](http://oss.digirati.com.br/f3/).
+- If you're running EStation3 on a on Raspberry Pi and have problems with config file changes not taking effect, content missing after editing, etc., check if your SD card is corrupted (see issues [#78](https://github.com/Aloshi/EmulationStation/issues/78) and [#107](https://github.com/Aloshi/EmulationStation/issues/107)). You can do this with free tools like [h2testw](http://www.heise.de/download/h2testw.html) or [F3](http://oss.digirati.com.br/f3/).
 
 - Try to update to the latest version of EmulationStation using git (you might need to delete your `es_input.cfg` and `es_settings.cfg` after that to reset them to default values):
 ```bash
