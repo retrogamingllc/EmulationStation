@@ -2744,6 +2744,7 @@ struct NSVGimage* nsvgParseFromFile(const char* filename, const char* units, flo
 {
     FILE* fp = NULL;
     int size;
+    int size_read; //added to get rid of compile warning -- Ben Roberts 2016-07-01
     char* data = NULL;
     struct NSVGimage* image = NULL;
 
@@ -2758,7 +2759,10 @@ struct NSVGimage* nsvgParseFromFile(const char* filename, const char* units, flo
     if (data == NULL) {
         goto error;
     }
-    fread(data, size, 1, fp);
+    size_read = fread(data, size, 1, fp);
+    if(size_read != size){ //added test of amound of data read to get rid of compile warning -- Ben Roberts 2016-07-01
+        size = size_read;
+    }
     data[size] = '\0';	// Must be null terminated.
     fclose(fp);
     image = nsvgParse(data, units, dpi);
