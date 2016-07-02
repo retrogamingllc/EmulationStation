@@ -39,7 +39,13 @@ bool compareRating(const FileData* file1, const FileData* file2)
 {
     //only games have rating metadata
     if(file1->metadata.getType() == GAME_METADATA && file2->metadata.getType() == GAME_METADATA) {
-        return file1->metadata.getFloat("rating") < file2->metadata.getFloat("rating");
+        float r1 = file1->metadata.getFloat("rating"), r2 = file2->metadata.getFloat("rating");
+        if (r1 == r2) {
+            // if two games are equal we fall back to file names
+            return compareFileName(file1, file2);
+        } else {
+            return r1 < r2;
+        }
     }
 
     return false;
@@ -49,7 +55,13 @@ bool compareTimesPlayed(const FileData* file1, const FileData* file2)
 {
     //only games have playcount metadata
     if(file1->metadata.getType() == GAME_METADATA && file2->metadata.getType() == GAME_METADATA) {
-        return (file1)->metadata.getInt("playcount") < (file2)->metadata.getInt("playcount");
+        int pc1 = (file1)->metadata.getInt("playcount"), pc2 = (file2)->metadata.getInt("playcount");
+        if(pc1 == pc2) {
+            // if two games are equal we fall back to file names
+            return compareFileName(file1, file2);
+        } else {
+            return pc1 < pc2;
+        }
     }
 
     return false;
@@ -59,7 +71,13 @@ bool compareLastPlayed(const FileData* file1, const FileData* file2)
 {
     //only games have lastplayed metadata
     if(file1->metadata.getType() == GAME_METADATA && file2->metadata.getType() == GAME_METADATA) {
-        return (file1)->metadata.getTime("lastplayed") < (file2)->metadata.getTime("lastplayed");
+        boost::posix_time::ptime lp1 = (file1)->metadata.getTime("lastplayed") , lp2 =(file2)->metadata.getTime("lastplayed");
+        if(lp1 == lp2) {
+            // if two games are equal we fall back to file names
+            return compareFileName(file1, file2);
+        } else {
+            return lp1 < lp2;
+        }
     }
 
     return false;

@@ -1,17 +1,19 @@
 #pragma once
 
-#include "pugixml/pugixml.hpp"
-#include <string>
-#include <map>
 #include "GuiComponent.h"
+
+#include "pugixml/pugixml.hpp"
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
+#include <string>
+#include <map>
 
 enum MetaDataType {
     //generic types
     MD_STRING,
     MD_INT,
     MD_FLOAT,
+    MD_BOOL,
 
     //specialized types
     MD_MULTILINE_STRING,
@@ -51,6 +53,7 @@ public:
     const std::string& get(const std::string& key) const;
     int getInt(const std::string& key) const;
     float getFloat(const std::string& key) const;
+    bool getBool(const std::string& key) const;
     boost::posix_time::ptime getTime(const std::string& key) const;
 
     inline MetaDataListType getType() const

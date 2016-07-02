@@ -1,5 +1,7 @@
 #include "MetaData.h"
+
 #include "components/TextComponent.h"
+
 #include "Log.h"
 #include "Util.h"
 
@@ -19,6 +21,8 @@ MetaDataDecl gameDecls[] = {
     {"publisher",	MD_STRING,				"unknown",			false,		"publisher",			"enter game publisher"},
     {"genre",		MD_STRING,				"unknown",			false,		"genre",				"enter game genre"},
     {"players",		MD_INT,					"1",				false,		"players",				"enter number of players"},
+    {"hidden",	    MD_BOOL,				"false",			false,	    "hidden"			    ""}, // TODO: shows up funny in the UI, so made prompt blank.
+    // note: all non-statistic MDs must go above the statistic ones. probably should check the logic in GuiMetaDataEd
     {"playcount",	MD_INT,					"0",				true,		"play count",			"enter number of times played"},
     {"lastplayed",	MD_TIME,				"0", 				true,		"last played",			"enter last played date"}
 };
@@ -29,6 +33,7 @@ MetaDataDecl folderDecls[] = {
     {"desc",		MD_MULTILINE_STRING,	"", 	false},
     {"image",		MD_IMAGE_PATH,			"", 	false},
     {"thumbnail",	MD_IMAGE_PATH,			"", 	false},
+    {"hidden",		MD_BOOL,			"",	false}
 };
 const std::vector<MetaDataDecl> folderMDD(folderDecls, folderDecls + sizeof(folderDecls) / sizeof(folderDecls[0]));
 
@@ -128,6 +133,19 @@ int MetaDataList::getInt(const std::string& key) const
 float MetaDataList::getFloat(const std::string& key) const
 {
     return (float)atof(get(key).c_str());
+}
+
+bool MetaDataList::getBool(const std::string& key) const
+{
+    std::string to_test = get(key);
+    if(to_test == "true") {
+        return true;
+    } else if(to_test == "false" || to_test == "") {
+        return false;
+    } else {
+        LOG(LogWarning) << "Hidden must be \"true\" or \"false\". Defaulting to \"false\"";
+        return false;
+    }
 }
 
 boost::posix_time::ptime MetaDataList::getTime(const std::string& key) const

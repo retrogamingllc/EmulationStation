@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IList.h"
+
 #include <functional>
 
 struct ComponentListElement {

@@ -1,12 +1,15 @@
 #include "Window.h"
-#include <iostream>
+
+#include "components/HelpComponent.h"
+#include "components/ImageComponent.h"
+
 #include "Renderer.h"
 #include "AudioManager.h"
 #include "Log.h"
 #include "Settings.h"
+
+#include <iostream>
 #include <iomanip>
-#include "components/HelpComponent.h"
-#include "components/ImageComponent.h"
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
     mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0)
