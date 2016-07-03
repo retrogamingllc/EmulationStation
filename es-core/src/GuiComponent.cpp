@@ -1,8 +1,10 @@
 #include "GuiComponent.h"
+
+#include "animations/AnimationController.h"
+
 #include "Window.h"
 #include "Log.h"
 #include "Renderer.h"
-#include "animations/AnimationController.h"
 #include "ThemeData.h"
 
 GuiComponent::GuiComponent(Window* window) : mWindow(window), mParent(NULL), mOpacity(255),

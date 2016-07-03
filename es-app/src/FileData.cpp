@@ -1,4 +1,5 @@
 #include "FileData.h"
+
 #include "SystemData.h"
 
 namespace fs = boost::filesystem;
@@ -64,7 +65,7 @@ FileData::~FileData()
 std::string FileData::getDisplayName() const
 {
     std::string stem = mPath.stem().generic_string();
-    if(mSystem && mSystem->hasPlatformId(PlatformIds::ARCADE) || mSystem->hasPlatformId(PlatformIds::NEOGEO)) {
+    if(mSystem && (mSystem->hasPlatformId(PlatformIds::ARCADE) || mSystem->hasPlatformId(PlatformIds::NEOGEO))) {
         stem = PlatformIds::getCleanMameName(stem.c_str());
     }
 

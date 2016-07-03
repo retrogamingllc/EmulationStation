@@ -2,6 +2,7 @@
 
 #include "components/AnimatedImageComponent.h"
 #include "components/TextComponent.h"
+
 #include "Renderer.h"
 
 // animation definition
