@@ -192,9 +192,8 @@ void DetailedGameListView::updateInfoPanel()
         mDescription.setText(file->metadata.get("desc"));
         mDescContainer.reset();
 
-        mThemeFolder = file->metadata.get("theme");
-
         if(file->getType() == GAME) {
+            mThemeFolder = file->metadata.get("theme");
             if(!mThemeFolder.empty()){
                 std::string path = ThemeData::getThemeFromCurrentSet(mThemeFolder).generic_string();
 
@@ -211,7 +210,6 @@ void DetailedGameListView::updateInfoPanel()
 
                 }
 
-            //TODO set theme
             }
             mRating.setValue(file->metadata.get("rating"));
             mReleaseDate.setValue(file->metadata.get("releasedate"));
