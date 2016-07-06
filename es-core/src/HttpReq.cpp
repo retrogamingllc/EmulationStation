@@ -35,11 +35,11 @@ bool HttpReq::isUrl(const std::string& str)
 }
 
 HttpReq::HttpReq(const std::string& url)
-    : mStatus(REQ_IN_PROGRESS), mHandle(NULL)
+    : mHandle(nullptr), mStatus(REQ_IN_PROGRESS)
 {
     mHandle = curl_easy_init();
 
-    if(mHandle == NULL) {
+    if(mHandle == nullptr) {
         mStatus = REQ_IO_ERROR;
         onError("curl_easy_init failed");
         return;
@@ -108,11 +108,11 @@ HttpReq::Status HttpReq::status()
 
         int msgs_left;
         CURLMsg* msg;
-        while(msg = curl_multi_info_read(s_multi_handle, &msgs_left)) {
+        while((msg = curl_multi_info_read(s_multi_handle, &msgs_left)) != nullptr) {
             if(msg->msg == CURLMSG_DONE) {
                 HttpReq* req = s_requests[msg->easy_handle];
 
-                if(req == NULL) {
+                if(req == nullptr) {
                     LOG(LogError) << "Cannot find easy handle!";
                     continue;
                 }

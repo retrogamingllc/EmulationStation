@@ -110,6 +110,7 @@ You can use `--help` or `-h` to view a list of command-line options. Briefly out
 --windowed	- run ES in a window, works best in conjunction with --resolution [w] [h].
 --vsync [1/on or 0/off]	- turn vsync on or off (default is on).
 --scrape	- run the interactive command-line metadata scraper.
+--config-directory [path]  - use a different path for the configurations
 ```
 
 As long as ES hasn't frozen, you can always press F4 to close the application.

@@ -380,8 +380,8 @@ void InputManager::doOnFinish()
 
 std::string InputManager::getConfigPath()
 {
-    std::string path = getHomePath();
-    path += "/.emulationstation/es_input.cfg";
+    std::string path = getConfigDirectory();
+    path += "/es_input.cfg";
     return path;
 }
 

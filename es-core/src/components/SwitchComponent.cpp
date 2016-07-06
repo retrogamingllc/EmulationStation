@@ -4,6 +4,8 @@
 
 #include "Renderer.h"
 #include "Window.h"
+#include "Log.h"
+
 
 SwitchComponent::SwitchComponent(Window* window, bool state) : GuiComponent(window), mImage(window), mState(state)
 {
@@ -15,6 +17,23 @@ SwitchComponent::SwitchComponent(Window* window, bool state) : GuiComponent(wind
 void SwitchComponent::onSizeChanged()
 {
     mImage.setSize(mSize);
+}
+
+std::string SwitchComponent::getValue() const
+{
+    return  mState ? "true" : "false";
+}
+
+void SwitchComponent::setValue(const std::string& value)
+{
+    if(value == "true") {
+        setState(true);
+    } else if(value == "false") {
+        setState(false);
+    } else {
+        LOG(LogWarning) << "SwitchComponent setValue must be \"true\" or \"false\". Defaulting to false.";
+        setState(false);
+    }
 }
 
 bool SwitchComponent::input(InputConfig* config, Input input)

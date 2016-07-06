@@ -1,4 +1,3 @@
-#include "EmulationStation.h"
 #include "guis/GuiMenu.h"
 
 #include "guis/GuiMsgBox.h"
@@ -18,6 +17,7 @@
 #include "scrapers/GamesDBScraper.h"
 #include "scrapers/TheArchiveScraper.h"
 
+#include "EmulationStation.h"
 #include "Window.h"
 #include "Sound.h"
 #include "Log.h"

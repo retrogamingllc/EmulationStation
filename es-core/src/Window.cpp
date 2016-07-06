@@ -9,9 +9,10 @@
 #include "Settings.h"
 
 #include <iostream>
+#include <cstring>
 #include <iomanip>
 
-Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
+Window::Window() : mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10), mNormalizeNextUpdate(false),
     mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0)
 {
     mHelp = new HelpComponent(this);
@@ -266,8 +267,8 @@ void Window::setHelpPrompts(const std::vector<HelpPrompt>& prompts, const HelpSt
                 // yes, it has!
 
                 // can we combine? (dpad only)
-                if((it->first == "up/down" && addPrompts.at(mappedTo->second).first == "left/right") ||
-                        (it->first == "left/right" && addPrompts.at(mappedTo->second).first == "up/down")) {
+                if((strcmp(it->first, "up/down") == 0 && strcmp(addPrompts.at(mappedTo->second).first, "left/right") == 0) ||
+                        (strcmp(it->first, "left/right") == 0 && strcmp(addPrompts.at(mappedTo->second).first, "up/down") == 0 )) {
                     // yes!
                     addPrompts.at(mappedTo->second).first = "up/down/left/right";
                     // don't need to add this to addPrompts since we just merged

@@ -4,6 +4,8 @@
 #include "Renderer.h"
 #include "Settings.h"
 
+#include <cstring>
+
 using namespace GridFlags;
 
 ComponentGrid::ComponentGrid(Window* window, const Eigen::Vector2i& gridDimensions) : GuiComponent(window),
@@ -434,13 +436,13 @@ std::vector<HelpPrompt> ComponentGrid::getHelpPrompts()
     bool canScrollVert = mGridSize.y() > 1;
     bool canScrollHoriz = mGridSize.x() > 1;
     for(auto it = prompts.begin(); it != prompts.end(); it++) {
-        if(it->first == "up/down/left/right") {
+        if(strcmp(it->first, "up/down/left/right") == 0) {
             canScrollHoriz = false;
             canScrollVert = false;
             break;
-        } else if(it->first == "up/down") {
+        } else if(strcmp(it->first, "up/down") == 0) {
             canScrollVert = false;
-        } else if(it->first == "left/right") {
+        } else if(strcmp(it->first, "left/right") == 0) {
             canScrollHoriz = false;
         }
     }

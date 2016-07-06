@@ -40,10 +40,21 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 {
     mList.clear();
 
+    // file list can be empty if direct launch item
+    if (files.size()==0) {
+        return;
+    }
+
     mHeaderText.setText(files.at(0)->getSystem()->getFullName());
 
+    bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
+
     for(auto it = files.begin(); it != files.end(); it++) {
-        mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+        if ((*it)->metadata.get("hidden") != "true" || showHiddenFiles) {
+            mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+        } else {
+            LOG(LogInfo) << (*it)->getPath() << " is hidden. Skipping displaying it.";
+        }
     }
 }
 

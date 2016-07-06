@@ -4,10 +4,11 @@
 #include "guis/GuiMsgBox.h"
 #include "guis/GuiTextEditPopup.h"
 
+#include "components/AsyncReqComponent.h"
 #include "components/TextEditComponent.h"
 #include "components/DateTimeComponent.h"
 #include "components/RatingComponent.h"
-#include "components/AsyncReqComponent.h"
+#include "components/SwitchComponent.h"
 
 #include "views/ViewController.h"
 
@@ -21,10 +22,9 @@ using namespace Eigen;
 
 GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector<MetaDataDecl>& mdd, ScraperSearchParams scraperParams,
                              const std::string& header, std::function<void()> saveCallback, std::function<void()> deleteFunc) : GuiComponent(window),
-    mScraperParams(scraperParams),
-
     mBackground(window, ":/frame.png"),
     mGrid(window, Vector2i(1, 3)),
+    mScraperParams(scraperParams),
 
     mMetaDataDecl(mdd),
     mMetaData(md),
@@ -77,6 +77,19 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
             break;
         }
+        case MD_BOOL: {
+            ed = std::make_shared<SwitchComponent>(window);
+            //ed->setState(false);
+            row.addElement(ed, false, true);
+
+            auto spacer = std::make_shared<GuiComponent>(mWindow);
+            spacer->setSize(Renderer::getScreenWidth() * 0.0025f, 0);
+            row.addElement(spacer, false);
+
+            // pass input to the actual SwitchComponent instead of the spacer
+            row.input_handler = std::bind(&GuiComponent::input, ed.get(), std::placeholders::_1, std::placeholders::_2);
+            break;
+        }
         case MD_DATE: {
             ed = std::make_shared<DateTimeComponent>(window);
             row.addElement(ed, false);
@@ -87,7 +100,6 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
             // pass input to the actual DateTimeComponent instead of the spacer
             row.input_handler = std::bind(&GuiComponent::input, ed.get(), std::placeholders::_1, std::placeholders::_2);
-
             break;
         }
         case MD_TIME: {

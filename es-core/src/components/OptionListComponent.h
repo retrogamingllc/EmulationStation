@@ -243,7 +243,6 @@ public:
         onSelectedChanged();
     }
 
-private:
     unsigned int getSelectedId()
     {
         assert(mMultiSelect == false);
@@ -257,6 +256,7 @@ private:
         return 0;
     }
 
+private:
     void open()
     {
         mWindow->pushGui(new OptionListPopup(mWindow, this, mName));

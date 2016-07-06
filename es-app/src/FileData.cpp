@@ -1,6 +1,7 @@
 #include "FileData.h"
 
 #include "SystemData.h"
+#include "Settings.h"
 
 namespace fs = boost::filesystem;
 
@@ -87,17 +88,23 @@ const std::string& FileData::getThumbnailPath() const
 }
 
 
-std::vector<FileData*> FileData::getFilesRecursive(unsigned int typeMask) const
+std::vector<FileData*> FileData::getFilesRecursive(unsigned int typeMask, bool forceHidden) const
 {
     std::vector<FileData*> out;
 
     for(auto it = mChildren.begin(); it != mChildren.end(); it++) {
-        if((*it)->getType() & typeMask) {
-            out.push_back(*it);
+        if((*it)->getType() & typeMask & (!(*it)->metadata.getBool("hidden") || Settings::getInstance()->getBool("ShowHiddenFiles") || forceHidden)) {
+            if ((*it)->getParent() != NULL) {
+                if (!(*it)->getParent()->metadata.getBool("hidden") || Settings::getInstance()->getBool("ShowHiddenFiles") || forceHidden) {
+                    out.push_back(*it);
+                }
+            } else {
+                out.push_back(*it);
+            }
         }
 
         if((*it)->getChildren().size() > 0) {
-            std::vector<FileData*> subchildren = (*it)->getFilesRecursive(typeMask);
+            std::vector<FileData*> subchildren = (*it)->getFilesRecursive(typeMask, forceHidden);
             out.insert(out.end(), subchildren.cbegin(), subchildren.cend());
         }
     }
