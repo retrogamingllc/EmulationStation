@@ -216,9 +216,11 @@ int main(int argc, char* argv[])
             Settings::getInstance()->setString("ConfigDirectory", getDefaultConfigDirectory());
         }
     }
-    if(!Settings::getInstance()->loadFile()) {
-        std::cerr << "Couldn't load settings from \"" << getConfigDirectory();
-        return 1;
+
+    bool loaded_file = Settings::getInstance()->loadFile();
+
+    if(!leaded_file) {
+        std::cout << "Couldn't load settings from \"" << getConfigDirectory() << ". Will create new ones." << "\n";
     }
 
     //start the logger
@@ -250,7 +252,7 @@ int main(int argc, char* argv[])
     if(!loadSystemConfigFile(&errorMsg)) {
         // something went terribly wrong
         if(errorMsg == NULL) {
-            LOG(LogError) << "Unknown error occured while parsing system config file.";
+            LOG(LogError) << "Unknown error occurred while parsing system config file.";
             if(!scrape_cmdline) {
                 Renderer::deinit();
             }
