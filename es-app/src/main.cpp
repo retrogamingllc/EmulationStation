@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 
     bool loaded_file = Settings::getInstance()->loadFile();
 
-    if(!leaded_file) {
+    if(!loaded_file) {
         std::cout << "Couldn't load settings from \"" << getConfigDirectory() << ". Will create new ones." << "\n";
     }
 
