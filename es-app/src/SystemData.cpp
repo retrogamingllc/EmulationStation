@@ -18,7 +18,8 @@ std::vector<SystemData*> SystemData::sSystemVector;
 namespace fs = boost::filesystem;
 
 SystemData::SystemData(const std::string& name, const std::string& fullName, const std::string& startPath, const std::vector<std::string>& extensions, 
-	const std::string& command, const std::vector<PlatformIds::PlatformId>& platformIds, const std::string& themeFolder)
+	const std::string& command, const std::vector<PlatformIds::PlatformId>& platformIds, const std::string& themeFolder, std::string& rawTheme,
+	bool systemEnabled, std::string viewMode, int modSize)
 {
 	mName = name;
 	mFullName = fullName;
@@ -35,6 +36,11 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, con
 	mLaunchCommand = command;
 	mPlatformIds = platformIds;
 	mThemeFolder = themeFolder;
+
+	mRawTheme = rawTheme;
+	mSystemEnabled = systemEnabled;
+	mViewMode = viewMode;
+	mGridModSize = modSize;
 
 	mRootFolder = new FileData(FOLDER, mStartPath, this);
 	mRootFolder->metadata.set("name", mFullName);
@@ -223,6 +229,100 @@ std::vector<std::string> readList(const std::string& str, const char* delims = "
 	return ret;
 }
 
+/// Dump altered file to home/.emulationstation
+int SystemData::saveConfig() {
+	// Check and see if there is a config file saved in writeable location...
+	std::string path = getConfigPath(true);
+
+	// If not, try again with /etc/
+	if (!fs::exists(path)) {
+		LOG(LogInfo) << "Trying to load es_systems.cfg from /etc/ instead of home.";
+		path = getConfigPath(false);
+
+		if (!fs::exists(path)) {
+			LOG(LogInfo) << "There is no valid location of es_systems.cfg.  --Should be in /etc/emulationstation";
+			return -2;
+		}
+	}
+
+	// Load in config file.
+	pugi::xml_document doc;
+	pugi::xml_parse_result res = doc.load_file(path.c_str());
+	pugi::xml_node node;
+
+	// Keep track if anything changed and reload
+	bool bGamelistReload = false;
+	bool bSystemlistReload = false;
+
+	// Loop through all systems in system <vector>
+	bool bFound = false;
+	for (int i = 0; i < sSystemVector.size(); i++) {
+		SystemData* tSystem = sSystemVector[i];
+
+
+
+		// find this system's node in the config file.
+		for (node = doc.child("systemList").first_child(); node; node = node.next_sibling()) {
+			// First check if important things are changing (only check if you want these updated asap)
+			if (tSystem->getSystemViewMode() != node.child_value("viewmode")) bGamelistReload = true;
+			// Anoying job to compare bool and strings
+			std::string sTempEnabled = "false";
+			if (tSystem->getSystemEnabled()) sTempEnabled = "true";
+			if (sTempEnabled != node.child_value("enabled")) bSystemlistReload = true;
+
+			std::string sName = node.child_value("name");
+			if (sName == tSystem->getName()) {
+				// Append saveable values
+				pugi::xml_node tnode;
+				node.child("fullname").text().set(tSystem->getFullName().c_str());
+				
+				// Check if viewmode is in the cfg tree:
+				if (node.child_value("viewmode") == "") node.append_child("viewmode");
+				node.child("viewmode").text().set(tSystem->getSystemViewMode().c_str());
+					
+				std::string bEnabled = "false";
+				if (tSystem->getSystemEnabled()) bEnabled = "true";
+				// Check if enabledis in the cfg tree:
+				if (node.child_value("enabled") == "") node.append_child("enabled");
+				node.child("enabled").text().set(bEnabled.c_str());
+
+				node.child("theme").text().set(tSystem->getRawTheme().c_str());
+
+				// Set grid size
+				if (node.child_value("gridsize") == "") node.append_child("gridsize");
+				node.child("gridsize").text().set(tSystem->getGridModSize());
+
+				bFound = true;
+
+				break;
+			}
+
+		}
+
+		if (bFound) continue;
+
+		// if this system couldn't be found
+		LOG(LogError) << "Couldn't find system: " << tSystem->getName() << " In es_systems.cfg file.  That's bad.";
+	}
+
+	// Attempt to save this file to writeable area
+	path = getConfigPath(true);		// Make sure path is set to /.emulationstation
+	
+	try {
+		doc.save_file(path.c_str());
+	}
+	catch (int e) {
+		LOG(LogError) << "Could not create new es_systems.cfg in .emulationstation.  Discarding config.";
+		return -1;
+	}
+
+	// if anything changed, reload.
+	if (bGamelistReload) return 1;
+	if (bSystemlistReload) return 2;
+
+	return 0;
+}
+
 //creates systems from information located in a config file
 bool SystemData::loadConfig()
 {
@@ -260,12 +360,31 @@ bool SystemData::loadConfig()
 
 	for(pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system"))
 	{
-		std::string name, fullname, path, cmd, themeFolder;
+		std::string name, fullname, path, cmd, themeFolder, viewMode, rawtheme;
+		bool systemEnabled;
 		PlatformIds::PlatformId platformId = PlatformIds::PLATFORM_UNKNOWN;
+		int modsize = 1;
 
 		name = system.child("name").text().get();
 		fullname = system.child("fullname").text().get();
 		path = system.child("path").text().get();
+		rawtheme = system.child("theme").text().get();
+		if (system.child("enabled").text().get() != "") {
+			systemEnabled = (strcmp(system.child("enabled").text().get(), "true") == 0);			// If this system is disabled, set flag to not show it -jfk
+		}
+		else {
+			// set enabled to true so save will write it
+			systemEnabled = true;
+		}
+		
+
+		viewMode = system.child("viewmode").text().get();		// Gets the system's view mode.  (ignores if not there.)
+		if (viewMode == "") {
+			viewMode = "DEFAULT";
+		}
+
+		std::string tempmod = system.child("gridsize").text().get();
+		if (tempmod != "") modsize = std::stoi(tempmod);
 
 		// convert extensions list from a string into a vector of strings
 		std::vector<std::string> extensions = readList(system.child("extension").text().get());
@@ -310,7 +429,7 @@ bool SystemData::loadConfig()
 		boost::filesystem::path genericPath(path);
 		path = genericPath.generic_string();
 
-		SystemData* newSys = new SystemData(name, fullname, path, extensions, cmd, platformIds, themeFolder);
+		SystemData* newSys = new SystemData(name, fullname, path, extensions, cmd, platformIds, themeFolder, rawtheme, systemEnabled, viewMode, modsize);
 		if(newSys->getRootFolder()->getChildren().size() == 0)
 		{
 			LOG(LogWarning) << "System \"" << name << "\" has no games! Ignoring it.";
@@ -418,6 +537,26 @@ std::string SystemData::getThemePath() const
 	// not in game folder, try theme sets
 	return ThemeData::getThemeFromCurrentSet(mThemeFolder).generic_string();
 }
+
+void SystemData::setFullName(std::string nName) {
+	mFullName = nName;
+}
+
+/// Sets the current system object to show or not.
+bool SystemData::setSystemEnabled(bool bEnabled) {
+	mSystemEnabled = bEnabled;
+}
+
+/// Set modifier size for GameGrid
+void SystemData::setGridModSize(int s) {
+	mGridModSize = s;
+}
+
+/// Sets the current system view mode
+void SystemData::setSystemViewMode(std::string newViewMode) {
+	mViewMode = newViewMode;
+}
+
 
 bool SystemData::hasGamelist() const
 {
