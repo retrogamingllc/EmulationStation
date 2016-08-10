@@ -19,7 +19,7 @@
 // ============================================================================
 
 GridGameListView::GridGameListView(Window* window, SystemData* system) : ISimpleGameListView(window, system->getRootFolder()),
-	mGrid(window), mBackgroundImage(window), mTitle(window)  // mGrid has second argument for tile size mod.
+	mGrid(window, system->getGridModSize()), mBackgroundImage(window), mTitle(window)
 {
 	mTitle.setFont(Font::get(FONT_SIZE_MEDIUM));
 	mTitle.setPosition(0, mSize.y() * 0.05f);
