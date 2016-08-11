@@ -144,9 +144,9 @@ extern const size_t blank_game_png_size;
 extern const unsigned char blank_game_png_data[];
 
 struct Res2hEntry {
-    const std::string relativeFileName;
-    const size_t size;
-    const unsigned char * data;
+	const std::string relativeFileName;
+	const size_t size;
+	const unsigned char * data;
 };
 
 extern const size_t res2hNrOfFiles;

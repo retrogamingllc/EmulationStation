@@ -27,7 +27,7 @@ private:
 	std::shared_ptr<SwitchComponent> systemEnable_switch;
 
 	std::shared_ptr<SliderComponent> gamegrid_tilesize;
-	
+
 	SystemData* mSystem;
 
 	int mSaveLevel = 0;

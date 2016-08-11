@@ -6,7 +6,7 @@
 #include "SystemData.h"
 
 // ===========================================================================
-// Part of this was written by Aloshi but was never finished and added to ES. 
+// Part of this was written by Aloshi but was never finished and added to ES.
 // It would originally load all game art at ES load and could easily eat up
 // All VRAM in smaller systems, such as the raspberry pi.
 // I've added a half-baked way of loading game art into the image grid by doing
@@ -45,8 +45,7 @@ FileData* GridGameListView::getCursor()
 
 void GridGameListView::setCursor(FileData* file)
 {
-	if(!mGrid.setCursor(file) && mGrid.getEntryCount() > 0)
-	{
+	if(!mGrid.setCursor(file) && mGrid.getEntryCount() > 0) {
 		populateList(file->getParent()->getChildren());
 		mGrid.setCursor(file);
 		mTitle.setText(file->getName());
@@ -69,19 +68,19 @@ bool GridGameListView::input(InputConfig* config, Input input)
 	return ISimpleGameListView::input(config, input);
 }
 
-void GridGameListView::update(int deltatime) {
-	// For Loading in game data as the user clicks on the system. 
+void GridGameListView::update(int deltatime)
+{
+	// For Loading in game data as the user clicks on the system.
 	// Loads one game per frame, or if specified to load on frame x.
-	if (mReloading && mLoadFrame >= mLoadFrameKey){
+	if (mReloading && mLoadFrame >= mLoadFrameKey) {
 		mLoadFrame = 0;
 		if (mNextLoad < mSystem->getGameCount()) {
 			auto file = mSystem->getRootFolder()->getChildren();
 			auto it = file.at(mNextLoad);
-		
+
 			mGrid.add(it->getName(), it->getThumbnailPath(), it);
 			mNextLoad++;
-		}
-		else {
+		} else {
 			mReloading = false;
 			mNeedsRefresh = false;
 			mNextLoad = 0;
@@ -98,13 +97,16 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 		mReloading = true;
 
 		// If grid has some games still in it, continue after them
-		if (mGrid.getEntryCount() > 0) mNextLoad = mGrid.getEntryCount();
+		if (mGrid.getEntryCount() > 0) {
+			mNextLoad = mGrid.getEntryCount();
+		}
 
 		mHeaderText.setColor(0xFFFFFFFF);
 	}
 }
 
-void GridGameListView::InitGrid(const std::vector<FileData*>& files) {
+void GridGameListView::InitGrid(const std::vector<FileData*>& files)
+{
 	auto it = files.at(0);
 	mGrid.add(it->getName(), it->getThumbnailPath(), it);
 
@@ -118,18 +120,14 @@ void GridGameListView::launch(FileData* game)
 void GridGameListView::remove(FileData *game)
 {
 	boost::filesystem::remove(game->getPath());  // actually delete the file on the filesystem
-	if (getCursor() == game)                     // Select next element in list, or prev if none
-	{
+	if (getCursor() == game) {                   // Select next element in list, or prev if none
 		std::vector<FileData*> siblings = game->getParent()->getChildren();
 		auto gameIter = std::find(siblings.begin(), siblings.end(), game);
 		auto gamePos = std::distance(siblings.begin(), gameIter);
-		if (gameIter != siblings.end())
-		{
-			if ((gamePos + 1) < siblings.size())
-			{
+		if (gameIter != siblings.end()) {
+			if ((gamePos + 1) < siblings.size()) {
 				setCursor(siblings.at(gamePos + 1));
-			}
-			else if ((gamePos - 1) > 0) {
+			} else if ((gamePos - 1) > 0) {
 				setCursor(siblings.at(gamePos - 1));
 			}
 		}
@@ -151,12 +149,14 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 }
 
 
-void GridGameListView::onFocusGained() {
+void GridGameListView::onFocusGained()
+{
 	populateList(mSystem->getRootFolder()->getChildren());
-	
+
 }
 
-void GridGameListView::onFocusLost() {
+void GridGameListView::onFocusLost()
+{
 	while (mGrid.getEntryCount() > mImageCacheAmount) {
 		mGrid.remove();
 	}

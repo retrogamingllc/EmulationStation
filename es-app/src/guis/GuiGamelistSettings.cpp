@@ -20,7 +20,7 @@
 #include "components/OptionListComponent.h"
 #include "components/MenuComponent.h"
 
-GuiGamelistSettings::GuiGamelistSettings(Window* window, SystemData* system) : GuiComponent(window), 
+GuiGamelistSettings::GuiGamelistSettings(Window* window, SystemData* system) : GuiComponent(window),
 	mMenu(window, " SYSTEM SETTINGS"), mVersion(window)
 {
 	// %SystemName% Settings
@@ -75,7 +75,8 @@ GuiGamelistSettings::GuiGamelistSettings(Window* window, SystemData* system) : G
 	setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, Renderer::getScreenHeight() * 0.15f);
 }
 
-GuiGamelistSettings::~GuiGamelistSettings() {
+GuiGamelistSettings::~GuiGamelistSettings()
+{
 	if (mSaveLevel > 0) {
 		// Save Things
 		mSystem->SystemData::setSystemViewMode(mViewList->getSelected());
@@ -85,7 +86,9 @@ GuiGamelistSettings::~GuiGamelistSettings() {
 		int saveinfo = SystemData::saveConfig();
 
 		// Reload if user hit save&apply
-		if (mSaveLevel > 1) ViewController::get()->reloadAll();
+		if (mSaveLevel > 1) {
+			ViewController::get()->reloadAll();
+		}
 	}
 }
 
@@ -97,11 +100,11 @@ GuiGamelistSettings::~GuiGamelistSettings() {
 
 bool GuiGamelistSettings::input(InputConfig* config, Input input)
 {
-	if(GuiComponent::input(config, input))
+	if(GuiComponent::input(config, input)) {
 		return true;
+	}
 
-	if((config->isMappedTo("b", input) || config->isMappedTo("start", input)) && input.value != 0)
-	{
+	if((config->isMappedTo("b", input) || config->isMappedTo("start", input)) && input.value != 0) {
 		delete this;
 		return true;
 	}
