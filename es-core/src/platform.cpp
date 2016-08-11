@@ -20,124 +20,124 @@ namespace fs = boost::filesystem;
 
 std::string getDefaultConfigDirectory()
 {
-    fs::path path;
+	fs::path path;
 #ifdef _WIN32
-    CHAR my_documents[MAX_PATH];
-    SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
-    path = fs::path(my_documents) / fs::path("EmulationStation");
+	CHAR my_documents[MAX_PATH];
+	SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
+	path = fs::path(my_documents) / fs::path("EmulationStation");
 #elif __APPLE__ && !defined(USE_XDG_OSX)
-    const char* homePath = getenv("HOME");
-    path = boost::filesystem::path(homePath);
-    path /= fs::path("Library") / fs::path("Application Support") / fs::path("org.emulationstation.EmulationStation") ;
+	const char* homePath = getenv("HOME");
+	path = boost::filesystem::path(homePath);
+	path /= fs::path("Library") / fs::path("Application Support") / fs::path("org.emulationstation.EmulationStation") ;
 #else
-    const char* envXdgConfig = getenv("XDG_CONFIG_HOME");
-    if(envXdgConfig) {
-        path = fs::path(envXdgConfig);
-    } else {
-        const char* homePath = getenv("HOME");
-        path = fs::path(homePath);
-        path /= fs::path(".config");
-    }
-    path /= fs::path("emulationstation");
+	const char* envXdgConfig = getenv("XDG_CONFIG_HOME");
+	if(envXdgConfig) {
+		path = fs::path(envXdgConfig);
+	} else {
+		const char* homePath = getenv("HOME");
+		path = fs::path(homePath);
+		path /= fs::path(".config");
+	}
+	path /= fs::path("emulationstation");
 #endif
-    return path.generic_string();
+	return path.generic_string();
 }
 
 std::string getConfigDirectory()
 {
-    return Settings::getInstance()->getString("ConfigDirectory");
+	return Settings::getInstance()->getString("ConfigDirectory");
 }
 
 std::string getHomePath()
 {
-    std::string homePath;
+	std::string homePath;
 
-    // this should give you something like "/home/YOUR_USERNAME" on Linux and "C:\Users\YOUR_USERNAME\" on Windows
-    const char * envHome = getenv("HOME");
-    if(envHome != nullptr) {
-        homePath = envHome;
-    }
+	// this should give you something like "/home/YOUR_USERNAME" on Linux and "C:\Users\YOUR_USERNAME\" on Windows
+	const char * envHome = getenv("HOME");
+	if(envHome != nullptr) {
+		homePath = envHome;
+	}
 
 #ifdef WIN32
-    // but does not seem to work for Windows XP or Vista, so try something else
-    if (homePath.empty()) {
-        const char * envDir = getenv("HOMEDRIVE");
-        const char * envPath = getenv("HOMEPATH");
-        if (envDir != nullptr && envPath != nullptr) {
-            homePath = envDir;
-            homePath += envPath;
+	// but does not seem to work for Windows XP or Vista, so try something else
+	if (homePath.empty()) {
+		const char * envDir = getenv("HOMEDRIVE");
+		const char * envPath = getenv("HOMEPATH");
+		if (envDir != nullptr && envPath != nullptr) {
+			homePath = envDir;
+			homePath += envPath;
 
-            for(unsigned int i = 0; i < homePath.length(); i++)
-                if(homePath[i] == '\\') {
-                    homePath[i] = '/';
-                }
-        }
-    }
+			for(unsigned int i = 0; i < homePath.length(); i++)
+				if(homePath[i] == '\\') {
+					homePath[i] = '/';
+				}
+		}
+	}
 #endif
 
-    // convert path to generic directory seperators
-    boost::filesystem::path genericPath(homePath);
-    return genericPath.generic_string();
+	// convert path to generic directory seperators
+	boost::filesystem::path genericPath(homePath);
+	return genericPath.generic_string();
 }
 
 int runShutdownCommand()
 {
 #if defined(WIN32)
-    return system("shutdown -s -t 0");
+	return system("shutdown -s -t 0");
 #elif defined(__linux__)
-    sync();
-    return reboot(RB_POWER_OFF);
+	sync();
+	return reboot(RB_POWER_OFF);
 #else
-    return system("sudo shutdown -h now");
+	return system("sudo shutdown -h now");
 #endif
 }
 
 int runRestartCommand()
 {
 #if defined(WIN32)
-    return system("shutdown -r -t 0");
+	return system("shutdown -r -t 0");
 #elif defined(__linux__)
-    sync();
-    return reboot(RB_AUTOBOOT);
+	sync();
+	return reboot(RB_AUTOBOOT);
 #else
-    return system("sudo shutdown -r now");
+	return system("sudo shutdown -r now");
 #endif
 }
 
 int runSystemCommand(const std::string& cmd_utf8)
 {
 #ifdef WIN32
-    // on Windows we use _wsystem to support non-ASCII paths
-    // which requires converting from utf8 to a wstring
-    typedef std::codecvt_utf8<wchar_t> convert_type;
-    std::wstring_convert<convert_type, wchar_t> converter;
-    std::wstring wchar_str = converter.from_bytes(cmd_utf8);
-    return _wsystem(wchar_str.c_str());
+	// on Windows we use _wsystem to support non-ASCII paths
+	// which requires converting from utf8 to a wstring
+	typedef std::codecvt_utf8<wchar_t> convert_type;
+	std::wstring_convert<convert_type, wchar_t> converter;
+	std::wstring wchar_str = converter.from_bytes(cmd_utf8);
+	return _wsystem(wchar_str.c_str());
 #else
-    return system(cmd_utf8.c_str());
+	return system(cmd_utf8.c_str());
 #endif
 }
 
 int quitES(const std::string& filename)
 {
-    touch(filename);
-    SDL_Event* quit = new SDL_Event();
-    quit->type = SDL_QUIT;
-    SDL_PushEvent(quit);
-    return 0;
+	touch(filename);
+	SDL_Event* quit = new SDL_Event();
+	quit->type = SDL_QUIT;
+	SDL_PushEvent(quit);
+	return 0;
 }
 
 void touch(const std::string& filename)
 {
 #ifdef WIN32
-    int fd = _open(filename.c_str(), O_CREAT | O_WRONLY, 0644);
-    if (fd >= 0) {
-        _close(fd);
-    }
+	int fd = _open(filename.c_str(), O_CREAT | O_WRONLY, 0644);
+	if (fd >= 0) {
+		_close(fd);
+	}
 #else
-    int fd = open(filename.c_str(), O_CREAT | O_WRONLY, 0644);
-    if (fd >= 0) {
-        close(fd);
-    }
+	int fd = open(filename.c_str(), O_CREAT | O_WRONLY, 0644);
+	if (fd >= 0) {
+		close(fd);
+	}
 #endif
 }
