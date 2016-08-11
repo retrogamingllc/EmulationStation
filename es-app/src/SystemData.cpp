@@ -385,6 +385,13 @@ bool SystemData::loadConfig()
 			std::string tempmod = node.child("gridsize").text().get();
 			if (tempmod != "") modsize = std::stoi(tempmod);
 		}
+		else 
+		{
+			// If es_systems-extra.cfg doesn't exist, set defaults
+			systemEnabled = true;
+			viewMode = "DEFAULT";
+			modsize = 1;
+		}
 
 		// convert extensions list from a string into a vector of strings
 		std::vector<std::string> extensions = readList(system.child("extension").text().get());
