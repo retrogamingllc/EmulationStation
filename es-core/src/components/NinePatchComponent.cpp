@@ -7,8 +7,7 @@
 #include "Util.h"
 
 NinePatchComponent::NinePatchComponent(Window* window, const std::string& path, unsigned int edgeColor, unsigned int centerColor) : GuiComponent(window),
-	mVertices(nullptr),
-	mColors(nullptr),
+    mVertices(NULL), mColors(NULL),
 	mPath(path),
 	mEdgeColor(edgeColor),
 	mCenterColor(centerColor)

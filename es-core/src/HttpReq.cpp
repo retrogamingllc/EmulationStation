@@ -108,11 +108,11 @@ HttpReq::Status HttpReq::status()
 
 		int msgs_left;
 		CURLMsg* msg;
-		while((msg = curl_multi_info_read(s_multi_handle, &msgs_left)) != nullptr) {
+		while(msg = curl_multi_info_read(s_multi_handle, &msgs_left)) {
 			if(msg->msg == CURLMSG_DONE) {
 				HttpReq* req = s_requests[msg->easy_handle];
 
-				if(req == nullptr) {
+				if(req == NULL) {
 					LOG(LogError) << "Cannot find easy handle!";
 					continue;
 				}

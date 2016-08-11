@@ -6,11 +6,6 @@
 #include "Log.h"
 #include "Util.h"
 
-#include GLHEADER
-#include <boost/filesystem.hpp>
-#include <iostream>
-#include <stack>
-
 namespace Renderer
 {
 std::stack<Eigen::Vector4i> clipStack;
