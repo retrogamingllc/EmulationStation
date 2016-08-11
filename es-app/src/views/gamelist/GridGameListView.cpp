@@ -4,6 +4,7 @@
 #include "Log.h"
 #include "views/ViewController.h"
 #include "SystemData.h"
+#include "Settings.h"
 
 // ===========================================================================
 // Part of this was written by Aloshi but was never finished and added to ES. 
@@ -63,8 +64,20 @@ bool GridGameListView::input(InputConfig* config, Input input)
 		return GuiComponent::input(config, input);
 	}
 
+	// Quick system change
+	if (config->isMappedTo("LeftShoulder", input) || config->isMappedTo("LeftTrigger", input)) {
+		if (Settings::getInstance()->getBool("QuickSystemSelect")) {
+			ViewController::get()->goToPrevGameList();
+			return true;
+		}
+	}
 
-	// Lefttop and righttop bumper controls in ISimpleGameListView.
+	if (config->isMappedTo("RightShoulder", input) || config->isMappedTo("RightTrigger", input)) {
+		if (Settings::getInstance()->getBool("QuickSystemSelect")) {
+			ViewController::get()->goToNextGameList();
+			return true;
+		}
+	}
 
 	return ISimpleGameListView::input(config, input);
 }
