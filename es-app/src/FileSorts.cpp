@@ -64,7 +64,7 @@ bool compareTimesPlayed(const FileData* file1, const FileData* file2)
 		}
 	}
 
-	return false;
+	return compareFileName(file1, file2);
 }
 
 bool compareLastPlayed(const FileData* file1, const FileData* file2)

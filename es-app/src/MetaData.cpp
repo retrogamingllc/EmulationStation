@@ -24,7 +24,7 @@ MetaDataDecl gameDecls[] = {
 	{"hidden",	    MD_BOOL,				"false",			false,	    "hidden"			    ""}, // TODO: shows up funny in the UI, so made prompt blank.
 	// note: all non-statistic MDs must go above the statistic ones. probably should check the logic in GuiMetaDataEd
 	{"playcount",	MD_INT,					"0",				true,		"play count",			"enter number of times played"},
-	{"lastplayed",	MD_TIME,				"0", 				true,		"last played",			"enter last played date"}
+	{"lastplayed",	MD_TIME,				"0", 				true,		"last played",			"enter last played date"},
 };
 const std::vector<MetaDataDecl> gameMDD(gameDecls, gameDecls + sizeof(gameDecls) / sizeof(gameDecls[0]));
 

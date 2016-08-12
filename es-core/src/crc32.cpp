@@ -6,6 +6,10 @@
 
 #include "crc32.h"
 
+#ifdef __linux__
+#include <endian.h>
+#endif
+
 
 /// same as reset()
 CRC32::CRC32()

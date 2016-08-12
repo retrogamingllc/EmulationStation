@@ -16,6 +16,7 @@ std::vector<const char*> settings_dont_save = boost::assign::list_of
 		("Debug")
 		("DebugGrid")
 		("DebugText")
+		("ParseGamelistOnly")
 		("ShowExit")
 		("Windowed")
 		("VSync")
@@ -47,6 +48,8 @@ void Settings::setDefaults()
 	mBoolMap["DrawFramerate"] = false;
 	mBoolMap["ShowExit"] = true;
 	mBoolMap["Windowed"] = false;
+	mBoolMap["SplashScreen"] = true;
+	mBoolMap["ShowHiddenFiles"] = false;
 
 #ifdef _RPI_
 	// don't enable VSync by default on the Pi, since it already
@@ -71,6 +74,7 @@ void Settings::setDefaults()
 	mIntMap["ScreenSaverTime"] = 5*60*1000; // 5 minutes
 	mIntMap["ScraperResizeWidth"] = 400;
 	mIntMap["ScraperResizeHeight"] = 0;
+	mIntMap["DisplayNumber"] = 0;
 
 	mStringMap["TransitionStyle"] = "fade";
 	mStringMap["ThemeSet"] = "";

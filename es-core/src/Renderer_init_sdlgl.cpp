@@ -61,6 +61,7 @@ bool createSurface()
 #ifdef USE_OPENGL_ES
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 #endif
+	int displayIndex = Settings::getInstance()->getInt("DisplayNumber");
 
 	SDL_DisplayMode dispMode;
 	SDL_GetDesktopDisplayMode(0, &dispMode);
@@ -72,7 +73,7 @@ bool createSurface()
 	}
 
 	sdlWindow = SDL_CreateWindow("EmulationStation",
-								 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+								 SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex),
 								 display_width, display_height,
 								 SDL_WINDOW_OPENGL | (Settings::getInstance()->getBool("Windowed") ? 0 : SDL_WINDOW_FULLSCREEN));
 

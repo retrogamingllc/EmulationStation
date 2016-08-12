@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fcntl.h>
 
-#ifdef WIN32
+#if defined(WIN32)
 #include <codecvt>
 #include <windows.h>
 #include <shlobj.h>

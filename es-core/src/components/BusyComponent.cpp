@@ -1,4 +1,4 @@
-#include "BusyComponent.h"
+#include "components/BusyComponent.h"
 
 #include "components/AnimatedImageComponent.h"
 #include "components/TextComponent.h"

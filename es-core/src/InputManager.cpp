@@ -348,6 +348,7 @@ void InputManager::writeDeviceConfig(InputConfig* config)
 	loadInputConfig(config);
 }
 
+
 void InputManager::doOnFinish()
 {
 	assert(initialized());

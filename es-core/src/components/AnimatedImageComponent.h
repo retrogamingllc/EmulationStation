@@ -1,5 +1,6 @@
+#include "components/ImageComponent.h"
+
 #include "GuiComponent.h"
-#include "ImageComponent.h"
 
 struct AnimationFrame {
 	const char* path;
@@ -34,5 +35,5 @@ private:
 	bool mLoop;
 	bool mEnabled;
 	int mFrameAccumulator;
-	int mCurrentFrame;
+	unsigned int mCurrentFrame;
 };

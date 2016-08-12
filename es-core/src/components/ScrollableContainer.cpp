@@ -62,7 +62,7 @@ void ScrollableContainer::update(int deltaTime)
 		mAutoScrollAccumulator += deltaTime;
 
 		//scale speed by our width! more text per line = slower scrolling
-		const float widthMod = (680.0f / getSize().x());
+		//const float widthMod = (680.0f / getSize().x());
 		while(mAutoScrollAccumulator >= mAutoScrollSpeed) {
 			mScrollPos += mScrollDir;
 			mAutoScrollAccumulator -= mAutoScrollSpeed;

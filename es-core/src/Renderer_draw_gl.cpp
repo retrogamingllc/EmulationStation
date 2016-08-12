@@ -1,10 +1,10 @@
-#include "platform.h"
 #include "Renderer.h"
 
 #include "resources/Font.h"
 
 #include "Log.h"
 #include "Util.h"
+#include "platform.h"
 
 namespace Renderer
 {

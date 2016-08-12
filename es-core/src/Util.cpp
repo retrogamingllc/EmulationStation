@@ -3,6 +3,10 @@
 #include "resources/ResourceManager.h"
 
 #include "platform.h"
+#include "md5.h"
+#include "crc32.h"
+
+#include <fstream>
 
 #include <fstream>
 
@@ -79,34 +83,34 @@ Eigen::Vector2f roundVector(const Eigen::Vector2f& vec)
 	return ret;
 }
 
-/*
+//NOTE:
 void hashFile(const boost::filesystem::path& path, Hash& algorithm)
 {
-    std::ifstream fileStream(path.generic_string(), std::ios::binary);
-    if(fileStream.is_open()) {
-        while(!fileStream.eof()) {
-            char buffer[4096];
-            fileStream.read(buffer, 4096);
-            int bytesRead = fileStream.gcount();
-            algorithm.add(buffer, bytesRead);
-        }
-    }
+	std::ifstream fileStream(path.generic_string(), std::ios::binary);
+	if(fileStream.is_open()) {
+		while(!fileStream.eof()) {
+			char buffer[4096];
+			fileStream.read(buffer, 4096);
+			int bytesRead = fileStream.gcount();
+			algorithm.add(buffer, bytesRead);
+		}
+	}
 }
 
 std::string getMd5(const boost::filesystem::path& path)
 {
     MD5 algorithm;
-    hashFile(path, algorithm);
-    return algorithm.getHash();
+	hashFile(path, algorithm);
+	return algorithm.getHash();
 }
 
 std::string getCrc(const boost::filesystem::path& path)
 {
-    CRC32 algorithm;
-    hashFile(path, algorithm);
-    return algorithm.getHash();
+	CRC32 algorithm;
+	hashFile(path, algorithm);
+	return algorithm.getHash();
 }
-*/
+//NOTE:
 
 // embedded resources, e.g. ":/font.ttf", need to be properly handled too
 std::string getCanonicalPath(const std::string& path)

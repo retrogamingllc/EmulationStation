@@ -223,7 +223,19 @@ int main(int argc, char* argv[])
 		std::cout << "Couldn't load settings from \"" << getConfigDirectory() << ". Will create new ones." << "\n";
 	}
 
-	//start the logger
+	if(Settings::getInstance()->getString("ConfigDirectory") == "") {
+		if(checkForOldConfigDirectory()) {
+			std::cerr << "Using old config directory, please migrate your files to \"" << getDefaultConfigDirectory() << "\" and delete the .emulationstation folder.";
+			Settings::getInstance()->setString("ConfigDirectory", getHomePath() + "/.emulationstation");
+		} else {
+			if(!createNewConfigDirectory()) {
+				return 1;
+			}
+			Settings::getInstance()->setString("ConfigDirectory", getDefaultConfigDirectory());
+		}
+	}
+
+
 	Log::open();
 	LOG(LogInfo) << "EmulationStation - v" << PROGRAM_VERSION_STRING << ", built " << PROGRAM_BUILT_STRING;
 
