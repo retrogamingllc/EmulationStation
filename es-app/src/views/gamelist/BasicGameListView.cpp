@@ -101,7 +101,7 @@ void BasicGameListView::remove(FileData *game)
 		auto gameIter = std::find(siblings.begin(), siblings.end(), game);
 		auto gamePos = std::distance(siblings.begin(), gameIter);
 		if (gameIter != siblings.end()) {
-			if ((gamePos + 1) < siblings.size()) {
+			if ((gamePos + 1) < (int)siblings.size()) {
 				setCursor(siblings.at(gamePos + 1));
 			} else if ((gamePos - 1) > 0) {
 				setCursor(siblings.at(gamePos - 1));

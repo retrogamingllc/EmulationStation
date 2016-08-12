@@ -23,8 +23,11 @@
 // as they're being loaded in.
 // ============================================================================
 
-GridGameListView::GridGameListView(Window* window, SystemData* system) : ISimpleGameListView(window, system->getRootFolder()),
-	mGrid(window, system->getGridModSize()), mBackgroundImage(window), mTitle(window)
+GridGameListView::GridGameListView(Window* window, SystemData* system) :
+	ISimpleGameListView(window, system->getRootFolder()),
+	mGrid(window, system->getGridModSize()),
+	mTitle(window),
+	mBackgroundImage(window)
 {
 	mTitle.setFont(Font::get(FONT_SIZE_MEDIUM));
 	mTitle.setPosition(0, mSize.y() * 0.05f);
@@ -153,7 +156,7 @@ void GridGameListView::remove(FileData *game)
 		auto gameIter = std::find(siblings.begin(), siblings.end(), game);
 		auto gamePos = std::distance(siblings.begin(), gameIter);
 		if (gameIter != siblings.end()) {
-			if ((gamePos + 1) < siblings.size()) {
+			if ((gamePos + 1) < (int)siblings.size()) {
 				setCursor(siblings.at(gamePos + 1));
 			} else if ((gamePos - 1) > 0) {
 				setCursor(siblings.at(gamePos - 1));

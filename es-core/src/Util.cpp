@@ -99,7 +99,7 @@ void hashFile(const boost::filesystem::path& path, Hash& algorithm)
 
 std::string getMd5(const boost::filesystem::path& path)
 {
-    MD5 algorithm;
+	MD5 algorithm;
 	hashFile(path, algorithm);
 	return algorithm.getHash();
 }

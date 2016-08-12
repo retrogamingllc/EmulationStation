@@ -14,13 +14,13 @@
 #define CURSOR_REPEAT_SPEED 28 // lower is faster
 
 TextEditComponent::TextEditComponent(Window* window) : GuiComponent(window),
-    mFocused(false),
-    mEditing(false),
-    mCursor(0),
+	mFocused(false),
+	mEditing(false),
+	mCursor(0),
 	mCursorRepeatDir(0),
 	mScrollOffset(0.0f, 0.0f),
 	mBox(window, ":/textinput_ninepatch.png"),
-    mFont(Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT))
+	mFont(Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT))
 {
 	addChild(&mBox);
 

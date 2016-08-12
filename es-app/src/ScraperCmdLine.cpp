@@ -111,6 +111,7 @@ int run_scraper_cmdline()
 	//manual mode
 	//==================================================================================
 
+    /*
 	out << "\n";
 	out << "You can let the scraper try to automatically choose the best result, or\n";
 	out << "you can manually approve each result. This \"manual mode\" is much more accurate.\n";
@@ -128,6 +129,7 @@ int run_scraper_cmdline()
 	} else {
 		out << "Scraping in automatic mode!\n";
 	}
+    */
 
 	//==================================================================================
 	//scraping

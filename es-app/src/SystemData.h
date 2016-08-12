@@ -46,7 +46,7 @@ public:
 	{
 		return mSystemEnabled;
 	}
-	bool setSystemEnabled(bool bEnabled);
+	void setSystemEnabled(bool bEnabled);
 	inline const std::string& getRawTheme() const
 	{
 		return mRawTheme;

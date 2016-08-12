@@ -8,6 +8,7 @@
 #include "guis/GuiSettings.h"
 #include "views/ViewController.h"
 #include "SystemData.h"
+#include "Log.h"
 
 #include <iostream>
 #include <fstream>
@@ -84,6 +85,10 @@ GuiGamelistSettings::~GuiGamelistSettings()
 		mSystem->setSystemEnabled(systemEnable_switch->getState());
 
 		int saveinfo = SystemData::saveConfig();
+
+        if(saveinfo < 0){
+            LOG(LogInfo) << "Error Saving  Configs";
+        }
 
 		// Reload if user hit save&apply
 		if (mSaveLevel > 1) {

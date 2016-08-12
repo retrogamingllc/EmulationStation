@@ -36,7 +36,7 @@ GuiFastSelect::GuiFastSelect(Window* window, IGameListView* gamelist) : GuiCompo
 	updateSortText();
 
 	mLetterId = LETTERS.find(mGameList->getCursor()->getName()[0]);
-	if(mLetterId == std::string::npos) {
+	if(mLetterId == (int)std::string::npos) {
 		mLetterId = 0;
 	}
 

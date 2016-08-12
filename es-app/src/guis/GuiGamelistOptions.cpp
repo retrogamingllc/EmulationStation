@@ -11,8 +11,8 @@
 #include "Log.h"
 
 GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window),
-	mSystem(system),
-	mMenu(window, "OPTIONS")
+	mMenu(window, "OPTIONS"),
+	mSystem(system)
 {
 	addChild(&mMenu);
 
@@ -86,6 +86,12 @@ GuiGamelistOptions::~GuiGamelistOptions()
 
 	// save things
 	int saveinfo = SystemData::saveConfig();
+      // Save system to writeable config file.  returns 0 on success, 1 = reload gamelist; 2=reload systemview; -x=errors
+    if(saveinfo < 0){
+        LOG(LogInfo) << "Error Saving  Configs";
+    }
+
+
 }
 
 void GuiGamelistOptions::openMetaDataEd()

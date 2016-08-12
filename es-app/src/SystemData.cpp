@@ -265,9 +265,15 @@ int SystemData::saveConfig()
 	pugi::xml_parse_result res = doc.load_file(path.c_str());
 	pugi::xml_node node;
 
+	if(!res) {
+		LOG(LogError) << "Could not parse es_systems-extra.cfg file!";
+		LOG(LogError) << res.description();
+		return false;
+	}
+
 	// Loop through all systems in system <vector>
-	bool bFound = false;
-	for (int i = 0; i < sSystemVector.size(); i++) {
+	//bool bFound = false;
+	for (unsigned int i = 0; i < sSystemVector.size(); i++) {
 		SystemData* tSystem = sSystemVector[i];
 
 		node = doc.child("systemList");
@@ -355,7 +361,7 @@ bool SystemData::loadConfig()
 	for(pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system")) {
 		std::string name, fullname, path, cmd, themeFolder, viewMode, rawtheme;
 		bool systemEnabled;
-		PlatformIds::PlatformId platformId = PlatformIds::PLATFORM_UNKNOWN;
+		//PlatformIds::PlatformId platformId = PlatformIds::PLATFORM_UNKNOWN;
 		int modsize = 1;
 
 		name = system.child("name").text().get();
@@ -374,12 +380,18 @@ bool SystemData::loadConfig()
 			pugi::xml_parse_result res = doc.load_file(ePath.c_str());
 			pugi::xml_node node;
 
+            if(!res) {
+                LOG(LogError) << "Could not parse es_systems-extra.cfg file!";
+                LOG(LogError) << res.description();
+                return false;
+            }
+
 			// find this system in extras
 			node = doc.child("systemList").child(name.c_str());
 
 			// Load it's extras
 			// --- System Enabled ---
-			if (node.child("enabled").text().get() != "") {
+			if (strcmp(node.child("enabled").text().get(),"") != 0 ) {
 				systemEnabled = (strcmp(node.child("enabled").text().get(), "true") == 0);
 			} else {
 				systemEnabled = true;
@@ -562,7 +574,7 @@ void SystemData::setFullName(std::string nName)
 }
 
 /// Sets the current system object to show or not.
-bool SystemData::setSystemEnabled(bool bEnabled)
+void SystemData::setSystemEnabled(bool bEnabled)
 {
 	mSystemEnabled = bEnabled;
 }

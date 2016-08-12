@@ -53,7 +53,7 @@ protected:
 
 	bool mNeedsRefresh = true;
 	bool mReloading = true;
-	int mNextLoad = 0;
+	unsigned int mNextLoad = 0;
 	int mLoadFrame = 0;
 	int mLoadFrameKey = 4;
 };
