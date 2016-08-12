@@ -33,8 +33,7 @@ private:
 
 	float mValue;
 
-	struct Vertex
-	{
+	struct Vertex {
 		Eigen::Vector2f pos;
 		Eigen::Vector2f tex;
 	} mVertices[12];

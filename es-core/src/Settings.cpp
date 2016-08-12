@@ -13,16 +13,16 @@ Settings* Settings::sInstance = NULL;
 // since they're set through command-line arguments, and not the in-program settings menu
 // TODO: what happens when you want both a command line config AND define it in es_sessings.cfg?
 std::vector<const char*> settings_dont_save = boost::assign::list_of
-	("Debug")
-	("DebugGrid")
-	("DebugText")
-	("ParseGamelistOnly")
-	("ShowExit")
-	("Windowed")
-	("VSync")
-	("HideConsole")
-    ("ConfigDirectory")
-	("IgnoreGamelist");
+		("Debug")
+		("DebugGrid")
+		("DebugText")
+		("ParseGamelistOnly")
+		("ShowExit")
+		("Windowed")
+		("VSync")
+		("HideConsole")
+		("ConfigDirectory")
+		("IgnoreGamelist");
 
 Settings::Settings()
 {
@@ -31,8 +31,9 @@ Settings::Settings()
 
 Settings* Settings::getInstance()
 {
-	if(sInstance == NULL)
+	if(sInstance == NULL) {
 		sInstance = new Settings();
+	}
 
 	return sInstance;
 }
@@ -51,7 +52,7 @@ void Settings::setDefaults()
 	mBoolMap["ShowHiddenFiles"] = false;
 
 #ifdef _RPI_
-	// don't enable VSync by default on the Pi, since it already 
+	// don't enable VSync by default on the Pi, since it already
 	// has trouble trying to render things at 60fps in certain menus
 	mBoolMap["VSync"] = false;
 #else
@@ -78,17 +79,17 @@ void Settings::setDefaults()
 	mStringMap["ThemeSet"] = "";
 	mStringMap["ScreenSaverBehavior"] = "dim";
 	mStringMap["Scraper"] = "TheGamesDB";
-    mStringMap["ConfigDirectory"] = "";
+	mStringMap["ConfigDirectory"] = "";
 }
 
 template <typename K, typename V>
 void saveMap(pugi::xml_document& doc, std::map<K, V>& map, const char* type)
 {
-	for(auto iter = map.begin(); iter != map.end(); iter++)
-	{
+	for(auto iter = map.begin(); iter != map.end(); iter++) {
 		// key is on the "don't save" list, so don't save it
-		if(std::find(settings_dont_save.begin(), settings_dont_save.end(), iter->first) != settings_dont_save.end())
+		if(std::find(settings_dont_save.begin(), settings_dont_save.end(), iter->first) != settings_dont_save.end()) {
 			continue;
+		}
 
 		pugi::xml_node node = doc.append_child(type);
 		node.append_attribute("name").set_value(iter->first.c_str());
@@ -107,8 +108,7 @@ void Settings::saveFile()
 	saveMap<std::string, float>(doc, mFloatMap, "float");
 
 	//saveMap<std::string, std::string>(doc, mStringMap, "string");
-	for(auto iter = mStringMap.begin(); iter != mStringMap.end(); iter++)
-	{
+	for(auto iter = mStringMap.begin(); iter != mStringMap.end(); iter++) {
 		pugi::xml_node node = doc.append_child("string");
 		node.append_attribute("name").set_value(iter->first.c_str());
 		node.append_attribute("value").set_value(iter->second.c_str());
@@ -121,28 +121,30 @@ bool Settings::loadFile()
 {
 	const std::string path = getConfigDirectory() + "/es_settings.cfg";
 
-	if(!boost::filesystem::exists(path))
-	{
+	if(!boost::filesystem::exists(path)) {
 		return false;
 	}
 
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file(path.c_str());
-	if(!result)
-	{
+	if(!result) {
 		LOG(LogError) << "Could not parse Settings file!\n   " << result.description();
 		return false;
 	}
 
-	for(pugi::xml_node node = doc.child("bool"); node; node = node.next_sibling("bool"))
+	for(pugi::xml_node node = doc.child("bool"); node; node = node.next_sibling("bool")) {
 		setBool(node.attribute("name").as_string(), node.attribute("value").as_bool());
-	for(pugi::xml_node node = doc.child("int"); node; node = node.next_sibling("int"))
+	}
+	for(pugi::xml_node node = doc.child("int"); node; node = node.next_sibling("int")) {
 		setInt(node.attribute("name").as_string(), node.attribute("value").as_int());
-	for(pugi::xml_node node = doc.child("float"); node; node = node.next_sibling("float"))
+	}
+	for(pugi::xml_node node = doc.child("float"); node; node = node.next_sibling("float")) {
 		setFloat(node.attribute("name").as_string(), node.attribute("value").as_float());
-	for(pugi::xml_node node = doc.child("string"); node; node = node.next_sibling("string"))
+	}
+	for(pugi::xml_node node = doc.child("string"); node; node = node.next_sibling("string")) {
 		setString(node.attribute("name").as_string(), node.attribute("value").as_string());
-    return true;
+	}
+	return true;
 }
 
 //Print a warning message if the setting we're trying to get doesn't already exist in the map, then return the value in the map.

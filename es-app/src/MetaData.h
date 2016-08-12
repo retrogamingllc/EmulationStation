@@ -8,8 +8,7 @@
 #include <string>
 #include <map>
 
-enum MetaDataType
-{
+enum MetaDataType {
 	//generic types
 	MD_STRING,
 	MD_INT,
@@ -24,8 +23,7 @@ enum MetaDataType
 	MD_TIME //used for lastplayed
 };
 
-struct MetaDataDecl
-{
+struct MetaDataDecl {
 	std::string key;
 	MetaDataType type;
 	std::string defaultValue;
@@ -34,8 +32,7 @@ struct MetaDataDecl
 	std::string displayPrompt; // phrase displayed in editors when prompted to enter value (currently only for strings)
 };
 
-enum MetaDataListType
-{
+enum MetaDataListType {
 	GAME_METADATA,
 	FOLDER_METADATA
 };
@@ -59,8 +56,14 @@ public:
 	bool getBool(const std::string& key) const;
 	boost::posix_time::ptime getTime(const std::string& key) const;
 
-	inline MetaDataListType getType() const { return mType; }
-	inline const std::vector<MetaDataDecl>& getMDD() const { return getMDDByType(getType()); }
+	inline MetaDataListType getType() const
+	{
+		return mType;
+	}
+	inline const std::vector<MetaDataDecl>& getMDD() const
+	{
+		return getMDDByType(getType());
+	}
 
 private:
 	MetaDataListType mType;

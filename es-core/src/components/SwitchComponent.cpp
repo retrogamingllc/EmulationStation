@@ -26,13 +26,11 @@ std::string SwitchComponent::getValue() const
 
 void SwitchComponent::setValue(const std::string& value)
 {
-	if(value == "true")
-	{
+	if(value == "true") {
 		setState(true);
-	}else if(value == "false")
-	{
+	} else if(value == "false") {
 		setState(false);
-	}else{
+	} else {
 		LOG(LogWarning) << "SwitchComponent setValue must be \"true\" or \"false\". Defaulting to false.";
 		setState(false);
 	}
@@ -40,8 +38,7 @@ void SwitchComponent::setValue(const std::string& value)
 
 bool SwitchComponent::input(InputConfig* config, Input input)
 {
-	if(config->isMappedTo("a", input) && input.value)
-	{
+	if(config->isMappedTo("a", input) && input.value) {
 		mState = !mState;
 		onStateChanged();
 		return true;

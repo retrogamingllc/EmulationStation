@@ -7,45 +7,45 @@
 #include <fcntl.h>
 
 #if defined(WIN32)
-	#include <codecvt>
-	#include <windows.h>
-	#include <shlobj.h>
-	#include <io.h>
+#include <codecvt>
+#include <windows.h>
+#include <shlobj.h>
+#include <io.h>
 #elif defined(__linux__)
-	#include <unistd.h>
-	#include <sys/reboot.h>
+#include <unistd.h>
+#include <sys/reboot.h>
 #endif
 
 namespace fs = boost::filesystem;
 
 std::string getDefaultConfigDirectory()
 {
-    fs::path path;
+	fs::path path;
 #ifdef _WIN32
-    CHAR my_documents[MAX_PATH];
-    SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
-    path = fs::path(my_documents) / fs::path("EmulationStation");
+	CHAR my_documents[MAX_PATH];
+	SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
+	path = fs::path(my_documents) / fs::path("EmulationStation");
 #elif __APPLE__ && !defined(USE_XDG_OSX)
-    const char* homePath = getenv("HOME");
-    path = boost::filesystem::path(homePath);
-    path /= fs::path("Library") / fs::path("Application Support") / fs::path("org.emulationstation.EmulationStation") ;
+	const char* homePath = getenv("HOME");
+	path = boost::filesystem::path(homePath);
+	path /= fs::path("Library") / fs::path("Application Support") / fs::path("org.emulationstation.EmulationStation") ;
 #else
-    const char* envXdgConfig = getenv("XDG_CONFIG_HOME");
-    if(envXdgConfig){
-        path = fs::path(envXdgConfig);
-    } else {
-        const char* homePath = getenv("HOME");
-        path = fs::path(homePath);
-        path /= fs::path(".config");
-    }
-    path /= fs::path("emulationstation");
+	const char* envXdgConfig = getenv("XDG_CONFIG_HOME");
+	if(envXdgConfig) {
+		path = fs::path(envXdgConfig);
+	} else {
+		const char* homePath = getenv("HOME");
+		path = fs::path(homePath);
+		path /= fs::path(".config");
+	}
+	path /= fs::path("emulationstation");
 #endif
-    return path.generic_string();
+	return path.generic_string();
 }
 
 std::string getConfigDirectory()
 {
-    return Settings::getInstance()->getString("ConfigDirectory");
+	return Settings::getInstance()->getString("ConfigDirectory");
 }
 
 std::string getHomePath()
@@ -54,8 +54,7 @@ std::string getHomePath()
 
 	// this should give you something like "/home/YOUR_USERNAME" on Linux and "C:\Users\YOUR_USERNAME\" on Windows
 	const char * envHome = getenv("HOME");
-	if(envHome != nullptr)
-	{
+	if(envHome != nullptr) {
 		homePath = envHome;
 	}
 
@@ -69,8 +68,9 @@ std::string getHomePath()
 			homePath += envPath;
 
 			for(unsigned int i = 0; i < homePath.length(); i++)
-				if(homePath[i] == '\\')
+				if(homePath[i] == '\\') {
 					homePath[i] = '/';
+				}
 		}
 	}
 #endif
@@ -131,11 +131,13 @@ void touch(const std::string& filename)
 {
 #ifdef WIN32
 	int fd = _open(filename.c_str(), O_CREAT | O_WRONLY, 0644);
-	if (fd >= 0)
+	if (fd >= 0) {
 		_close(fd);
+	}
 #else
 	int fd = open(filename.c_str(), O_CREAT | O_WRONLY, 0644);
-	if (fd >= 0)
+	if (fd >= 0) {
 		close(fd);
+	}
 #endif
 }

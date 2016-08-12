@@ -37,8 +37,7 @@ const std::vector<MetaDataDecl> folderMDD(folderDecls, folderDecls + sizeof(fold
 
 const std::vector<MetaDataDecl>& getMDDByType(MetaDataListType type)
 {
-	switch(type)
-	{
+	switch(type) {
 	case GAME_METADATA:
 		return gameMDD;
 	case FOLDER_METADATA:
@@ -55,8 +54,9 @@ MetaDataList::MetaDataList(MetaDataListType type)
 	: mType(type)
 {
 	const std::vector<MetaDataDecl>& mdd = getMDD();
-	for(auto iter = mdd.begin(); iter != mdd.end(); iter++)
+	for(auto iter = mdd.begin(); iter != mdd.end(); iter++) {
 		set(iter->key, iter->defaultValue);
+	}
 }
 
 
@@ -66,18 +66,17 @@ MetaDataList MetaDataList::createFromXML(MetaDataListType type, pugi::xml_node n
 
 	const std::vector<MetaDataDecl>& mdd = mdl.getMDD();
 
-	for(auto iter = mdd.begin(); iter != mdd.end(); iter++)
-	{
+	for(auto iter = mdd.begin(); iter != mdd.end(); iter++) {
 		pugi::xml_node md = node.child(iter->key.c_str());
-		if(md)
-		{
+		if(md) {
 			// if it's a path, resolve relative paths
 			std::string value = md.text().get();
-			if(iter->type == MD_IMAGE_PATH)
+			if(iter->type == MD_IMAGE_PATH) {
 				value = resolvePath(value, relativeTo, true).generic_string();
+			}
 
 			mdl.set(iter->key, value);
-		}else{
+		} else {
 			mdl.set(iter->key, iter->defaultValue);
 		}
 	}
@@ -89,20 +88,20 @@ void MetaDataList::appendToXML(pugi::xml_node parent, bool ignoreDefaults, const
 {
 	const std::vector<MetaDataDecl>& mdd = getMDD();
 
-	for(auto mddIter = mdd.begin(); mddIter != mdd.end(); mddIter++)
-	{
+	for(auto mddIter = mdd.begin(); mddIter != mdd.end(); mddIter++) {
 		auto mapIter = mMap.find(mddIter->key);
-		if(mapIter != mMap.end())
-		{
+		if(mapIter != mMap.end()) {
 			// we have this value!
 			// if it's just the default (and we ignore defaults), don't write it
-			if(ignoreDefaults && mapIter->second == mddIter->defaultValue)
+			if(ignoreDefaults && mapIter->second == mddIter->defaultValue) {
 				continue;
+			}
 
 			// try and make paths relative if we can
 			std::string value = mapIter->second;
-			if(mddIter->type == MD_IMAGE_PATH)
+			if(mddIter->type == MD_IMAGE_PATH) {
 				value = makeRelativePath(value, relativeTo, true).generic_string();
+			}
 
 			parent.append_child(mapIter->first.c_str()).text().set(value.c_str());
 		}
@@ -137,13 +136,11 @@ float MetaDataList::getFloat(const std::string& key) const
 bool MetaDataList::getBool(const std::string& key) const
 {
 	std::string to_test = get(key);
-	if(to_test == "true"){
+	if(to_test == "true") {
 		return true;
-	}
-	else if(to_test == "false" || to_test == ""){
+	} else if(to_test == "false" || to_test == "") {
 		return false;
-	}
-	else{
+	} else {
 		LOG(LogWarning) << "Hidden must be \"true\" or \"false\". Defaulting to \"false\"";
 		return false;
 	}

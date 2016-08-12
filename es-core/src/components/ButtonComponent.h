@@ -22,8 +22,14 @@ public:
 
 	void setText(const std::string& text, const std::string& helpText);
 
-	inline const std::string& getText() const { return mText; };
-	inline const std::function<void()>& getPressedFunc() const { return mPressedFunc; };
+	inline const std::string& getText() const
+	{
+		return mText;
+	};
+	inline const std::function<void()>& getPressedFunc() const
+	{
+		return mPressedFunc;
+	};
 
 	void onSizeChanged() override;
 	void onFocusGained() override;
@@ -39,7 +45,7 @@ private:
 	bool mEnabled;
 	unsigned int mTextColorFocused;
 	unsigned int mTextColorUnfocused;
-	
+
 	unsigned int getCurTextColor() const;
 	void updateImage();
 

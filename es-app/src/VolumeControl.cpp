@@ -62,5 +62,5 @@ int VolumeControl::getVolume() const
 
 void VolumeControl::setVolume(int volume)
 {
-    internalVolume = volume;
+	internalVolume = volume;
 }

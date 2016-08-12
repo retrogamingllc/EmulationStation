@@ -39,8 +39,7 @@ private:
 	void buildVertices();
 	void updateColors();
 
-	struct Vertex
-	{
+	struct Vertex {
 		Eigen::Vector2f pos;
 		Eigen::Vector2f tex;
 	};

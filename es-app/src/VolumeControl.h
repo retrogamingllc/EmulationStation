@@ -14,7 +14,7 @@ class VolumeControl
 
 	VolumeControl();
 	VolumeControl(const VolumeControl & right);
-    VolumeControl & operator=(const VolumeControl & right);
+	VolumeControl & operator=(const VolumeControl & right);
 
 public:
 	static std::shared_ptr<VolumeControl> & getInstance();

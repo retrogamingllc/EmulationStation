@@ -22,8 +22,7 @@ FileData* GridGameListView::getCursor()
 
 void GridGameListView::setCursor(FileData* file)
 {
-	if(!mGrid.setCursor(file))
-	{
+	if(!mGrid.setCursor(file)) {
 		populateList(file->getParent()->getChildren());
 		mGrid.setCursor(file);
 	}
@@ -31,8 +30,9 @@ void GridGameListView::setCursor(FileData* file)
 
 bool GridGameListView::input(InputConfig* config, Input input)
 {
-	if(config->isMappedTo("left", input) || config->isMappedTo("right", input))
+	if(config->isMappedTo("left", input) || config->isMappedTo("right", input)) {
 		return GuiComponent::input(config, input);
+	}
 
 	return ISimpleGameListView::input(config, input);
 }
@@ -40,13 +40,10 @@ bool GridGameListView::input(InputConfig* config, Input input)
 void GridGameListView::populateList(const std::vector<FileData*>& files)
 {
 	mGrid.clear();
-	for(auto it = files.begin(); it != files.end(); it++)
-	{
-		if ((*it)->metadata.get("hidden") != "true")
-		{
+	for(auto it = files.begin(); it != files.end(); it++) {
+		if ((*it)->metadata.get("hidden") != "true") {
 			mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
-		}
-		else{
+		} else {
 			LOG(LogInfo) << (*it)->getPath() << " is hidden. Skipping displaying it.";
 		}
 	}
