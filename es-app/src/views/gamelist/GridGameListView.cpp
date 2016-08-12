@@ -8,6 +8,7 @@
 #include "Log.h"
 #include "views/ViewController.h"
 #include "SystemData.h"
+#include "Settings.h"
 
 // ===========================================================================
 // Part of this was written by Aloshi but was never finished and added to ES.
@@ -66,8 +67,20 @@ bool GridGameListView::input(InputConfig* config, Input input)
 		return GuiComponent::input(config, input);
 	}
 
+	// Quick system change
+	if (config->isMappedTo("LeftShoulder", input) || config->isMappedTo("LeftTrigger", input)) {
+		if (Settings::getInstance()->getBool("QuickSystemSelect")) {
+			ViewController::get()->goToPrevGameList();
+			return true;
+		}
+	}
 
-	// Lefttop and righttop bumper controls in ISimpleGameListView.
+	if (config->isMappedTo("RightShoulder", input) || config->isMappedTo("RightTrigger", input)) {
+		if (Settings::getInstance()->getBool("QuickSystemSelect")) {
+			ViewController::get()->goToNextGameList();
+			return true;
+		}
+	}
 
 	return ISimpleGameListView::input(config, input);
 }
@@ -96,9 +109,9 @@ void GridGameListView::update(int deltatime)
 
 void GridGameListView::populateList(const std::vector<FileData*>& files)
 {
-    //NOTE: to allow for merging I am just commenting this out but i suspect
-    // the new grid system does not have hidden game support
-    /*
+	//NOTE: to allow for merging I am just commenting this out but i suspect
+	// the new grid system does not have hidden game support
+	/*
 	mGrid.clear();
 	for(auto it = files.begin(); it != files.end(); it++) {
 		if ((*it)->metadata.get("hidden") != "true") {
@@ -106,7 +119,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 		} else {
 			LOG(LogInfo) << (*it)->getPath() << " is hidden. Skipping displaying it.";
 		}
-        */
+	    */
 	// Sets the bool to load in games in update()
 	if (mNeedsRefresh) {
 		mReloading = true;
