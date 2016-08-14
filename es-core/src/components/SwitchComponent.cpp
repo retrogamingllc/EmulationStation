@@ -7,6 +7,8 @@
 #include "Log.h"
 
 
+#include "Log.h"
+
 SwitchComponent::SwitchComponent(Window* window, bool state) : GuiComponent(window), mImage(window), mState(state)
 {
 	mImage.setImage(":/off.svg");

@@ -22,12 +22,11 @@ public:
 	virtual bool input(InputConfig* config, Input input) override;
 	virtual void update(int deltatime) override;
 
+	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme);
 	virtual const char* getName() const override
 	{
 		return "grid";
 	}
-
-	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme);
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
@@ -56,4 +55,11 @@ protected:
 	int mNextLoad = 0;
 	int mLoadFrame = 0;
 	int mLoadFrameKey = 4;
+
+private:
+	bool mFavoriteChange;
+	bool mKidGameChange;
+	bool mFilterHidden;
+	bool mFilterFav;
+	bool mFilterKid;
 };

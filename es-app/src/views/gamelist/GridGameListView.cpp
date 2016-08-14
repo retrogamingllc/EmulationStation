@@ -24,7 +24,8 @@
 // ============================================================================
 
 GridGameListView::GridGameListView(Window* window, SystemData* system) : ISimpleGameListView(window, system->getRootFolder()),
-	mGrid(window, system->getGridModSize()), mBackgroundImage(window), mTitle(window)
+	mGrid(window, system->getGridModSize()), mBackgroundImage(window), mTitle(window),
+    mFavoriteChange(false), mKidGameChange(false)
 {
 	mTitle.setFont(Font::get(FONT_SIZE_MEDIUM));
 	mTitle.setPosition(0, mSize.y() * 0.05f);
@@ -32,6 +33,11 @@ GridGameListView::GridGameListView(Window* window, SystemData* system) : ISimple
 	mTitle.setSize(mSize.x(), 0);
 	mTitle.setAlignment(ALIGN_CENTER);
 	addChild(&mTitle);
+
+	mFilterHidden = ((Settings::getInstance()->getString("UIMode") == "Kiosk") ||
+					 (Settings::getInstance()->getString("UIMode") == "Kid"));
+	mFilterFav = Settings::getInstance()->getBool("FavoritesOnly");
+	mFilterKid = (Settings::getInstance()->getString("UIMode") == "Kid");
 
 	mGrid.setPosition(0, mSize.y() * 0.15f);
 	mGrid.setSize(mSize.x(), mSize.y() * 0.8f);
@@ -70,14 +76,14 @@ bool GridGameListView::input(InputConfig* config, Input input)
 	// Quick system change
 	if (config->isMappedTo("LeftShoulder", input) || config->isMappedTo("LeftTrigger", input)) {
 		if (Settings::getInstance()->getBool("QuickSystemSelect")) {
-			ViewController::get()->goToPrevGameList();
+            ViewController::get()->goToPrevGameList(mFilterHidden, mFilterFav, mFilterKid);
 			return true;
 		}
 	}
 
 	if (config->isMappedTo("RightShoulder", input) || config->isMappedTo("RightTrigger", input)) {
 		if (Settings::getInstance()->getBool("QuickSystemSelect")) {
-			ViewController::get()->goToNextGameList();
+            ViewController::get()->goToNextGameList(mFilterHidden, mFilterFav, mFilterKid);
 			return true;
 		}
 	}
@@ -91,11 +97,23 @@ void GridGameListView::update(int deltatime)
 	// Loads one game per frame, or if specified to load on frame x.
 	if (mReloading && mLoadFrame >= mLoadFrameKey) {
 		mLoadFrame = 0;
-		if (mNextLoad < mSystem->getGameCount()) {
+		if (mNextLoad < mSystem->getGameCount(mFilterHidden, mFilterFav, mFilterKid )) {
 			auto file = mSystem->getRootFolder()->getChildren();
 			auto it = file.at(mNextLoad);
 
-			mGrid.add(it->getName(), it->getThumbnailPath(), it);
+            if (it->metadata.get("hidden").compare("true") != 0) {
+                if (Settings::getInstance()->getBool("FavoritesOnly")) {
+                    if (it->metadata.get("favorite").compare("true") == 0) {
+                        mGrid.add(it->getName(), it->getThumbnailPath(), it);
+                    }
+                } else if(Settings::getInstance()->getString("UIMode") == "Kid") {
+                    if (it->metadata.get("kidgame").compare("true") == 0) {
+                        mGrid.add(it->getName(), it->getThumbnailPath(), it);
+                    }
+                } else {
+                    mGrid.add(it->getName(), it->getThumbnailPath(), it);
+                }
+            }
 			mNextLoad++;
 		} else {
 			mReloading = false;
@@ -109,17 +127,6 @@ void GridGameListView::update(int deltatime)
 
 void GridGameListView::populateList(const std::vector<FileData*>& files)
 {
-	//NOTE: to allow for merging I am just commenting this out but i suspect
-	// the new grid system does not have hidden game support
-	/*
-	mGrid.clear();
-	for(auto it = files.begin(); it != files.end(); it++) {
-		if ((*it)->metadata.get("hidden") != "true") {
-			mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
-		} else {
-			LOG(LogInfo) << (*it)->getPath() << " is hidden. Skipping displaying it.";
-		}
-	    */
 	// Sets the bool to load in games in update()
 	if (mNeedsRefresh) {
 		mReloading = true;

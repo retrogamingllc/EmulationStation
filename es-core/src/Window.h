@@ -66,4 +66,8 @@ private:
 	unsigned int mTimeSinceLastInput;
 
 	bool mRenderedHelpPrompts;
+
+	void ListenForPassKeySequence(InputConfig* config, Input input);
+	int mPasskeyCounter;
+	bool mRestartNeeded;
 };

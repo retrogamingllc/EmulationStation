@@ -21,8 +21,11 @@ MetaDataDecl gameDecls[] = {
 	{"publisher",	MD_STRING,				"unknown",			false,		"publisher",			"enter game publisher"},
 	{"genre",		MD_STRING,				"unknown",			false,		"genre",				"enter game genre"},
 	{"players",		MD_INT,					"1",				false,		"players",				"enter number of players"},
-	{"hidden",	    MD_BOOL,				"false",			false,	    "hidden"			    ""}, // TODO: shows up funny in the UI, so made prompt blank.
 	// note: all non-statistic MDs must go above the statistic ones. probably should check the logic in GuiMetaDataEd
+	{"favorite",	MD_BOOL,				"false",			false,		"favorite",				"enter favorite off/on"},
+	{"kidgame",		MD_BOOL,				"false",			false,		"kidgame",				"enter kidgame off/on"},
+	//{"hidden",	    MD_BOOL,				"false",			false,	    "hidden"			    ""}, // TODO: shows up funny in the UI, so made prompt blank.
+	{"hidden",		MD_BOOL,				"false",			false,		"hidden",				"enter hidden off/on"},
 	{"playcount",	MD_INT,					"0",				true,		"play count",			"enter number of times played"},
 	{"lastplayed",	MD_TIME,				"0", 				true,		"last played",			"enter last played date"}
 };

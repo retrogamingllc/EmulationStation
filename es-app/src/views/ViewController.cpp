@@ -34,6 +34,8 @@ ViewController::ViewController(Window* window)
 	: GuiComponent(window), mCurrentView(nullptr), mCamera(Eigen::Affine3f::Identity()), mFadeOpacity(0), mLockInput(false)
 {
 	mState.viewing = NOTHING;
+	mFavoritesOnly = Settings::getInstance()->getBool("FavoritesOnly");
+	mKidGamesOnly = Settings::getInstance()->getString("UIMode") == "Kid";
 }
 
 ViewController::~ViewController()
@@ -71,20 +73,33 @@ void ViewController::goToSystemView(SystemData* system)
 	playViewTransition();
 }
 
-void ViewController::goToNextGameList()
+void ViewController::goToNextGameList(bool bhidden, bool bfav, bool bkid)
 {
 	assert(mState.viewing == GAME_LIST);
 	SystemData* system = getState().getSystem();
 	assert(system);
-	goToGameList(system->getNext());
+
+	// skip systems that don't have a game list, this will always end since it is called
+	// from a system with a game list and the iterator is cyclic
+	do {
+		system = system->getNext();
+	} while ( system->getGameCount(bhidden, bfav, bkid) == 0 );
+
+	goToGameList(system);
 }
 
-void ViewController::goToPrevGameList()
+void ViewController::goToPrevGameList(bool bhidden, bool bfav, bool bkid)
 {
 	assert(mState.viewing == GAME_LIST);
 	SystemData* system = getState().getSystem();
 	assert(system);
-	goToGameList(system->getPrev());
+	// skip systems that don't have a game list, this will always end since it is called
+	// from a system with a game list and the iterator is cyclic
+	do {
+		system = system->getPrev();
+	} while ( system->getGameCount(bhidden, bfav, bkid) == 0 );
+
+	goToGameList(system);
 }
 
 void ViewController::goToGameList(SystemData* system)
@@ -99,6 +114,19 @@ void ViewController::goToGameList(SystemData* system)
 		mCamera.translation().x() -= offX;
 	}
 
+	if (mInvalidGameList[system] == true) {
+		updateFavorite(system, getGameListView(system).get()->getCursor());
+		updateKidGame(system, getGameListView(system).get()->getCursor());
+
+		if ((mFavoritesOnly != Settings::getInstance()->getBool("FavoritesOnly")) ||
+				(mKidGamesOnly != (Settings::getInstance()->getString("UIMode") == "Kid"))) {
+			reloadGameListView(system);
+			mFavoritesOnly = Settings::getInstance()->getBool("FavoritesOnly");
+			mKidGamesOnly = Settings::getInstance()->getString("UIMode") == "Kid";
+		}
+		mInvalidGameList[system] = false;
+	}
+
 	mState.viewing = GAME_LIST;
 	mState.system = system;
 
@@ -110,6 +138,94 @@ void ViewController::goToGameList(SystemData* system)
 
 	// Run the new view's onFocusGained
 	mCurrentView->onFocusGained();
+}
+
+void ViewController::goToRandomGame(bool bhidden, bool bfav, bool bkid)
+{
+	LOG(LogDebug) << "ViewController::goToRandomGame(" << bhidden << bfav << bkid << ")";
+
+	goToGameList(mState.system->getRandom(bhidden, bfav, bkid));
+
+	FileData* selected = mState.system->getRootFolder()->getRandom(bhidden, bfav, bkid);
+
+	IGameListView* view = getGameListView(mState.system).get();
+	view->setCursor(selected);
+
+	//mCurrentView.get()->setCursor(selected);
+	LOG(LogDebug) << "ViewController::goToRandomGame: done.";
+}
+
+void ViewController::updateFavorite(SystemData* system, FileData* file)
+{
+	IGameListView* view = getGameListView(system).get();
+	if (Settings::getInstance()->getBool("FavoritesOnly")) {
+		const std::vector<FileData*>& files = system->getRootFolder()->getChildren();
+		view->populateList(files);
+		int pos = std::find(files.begin(), files.end(), file) - files.begin();
+		bool found = false;
+		for (auto it = files.begin() + pos; it != files.end(); it++) {
+			if ((*it)->getType() == GAME) {
+				if ((*it)->metadata.get("favorite").compare("true") == 0) {
+					view->setCursor(*it);
+					found = true;
+					break;
+				}
+			}
+		}
+
+		if (!found) {
+			for (auto it = files.begin() + pos; it != files.begin(); it--) {
+				if ((*it)->getType() == GAME) {
+					if ((*it)->metadata.get("favorite").compare("true") == 0) {
+						view->setCursor(*it);
+						break;
+					}
+				}
+			}
+		}
+
+		if (!found) {
+			view->setCursor(*(files.begin() + pos));
+		}
+	}
+
+	view->updateInfoPanel();
+}
+void ViewController::updateKidGame(SystemData* system, FileData* file)
+{
+	IGameListView* view = getGameListView(system).get();
+	if (Settings::getInstance()->getString("UIMode") == "Kid") {
+		const std::vector<FileData*>& files = system->getRootFolder()->getChildren();
+		view->populateList(files);
+		int pos = std::find(files.begin(), files.end(), file) - files.begin();
+		bool found = false;
+		for (auto it = files.begin() + pos; it != files.end(); it++) {
+			if ((*it)->getType() == GAME) {
+				if ((*it)->metadata.get("kidgame").compare("true") == 0) {
+					view->setCursor(*it);
+					found = true;
+					break;
+				}
+			}
+		}
+
+		if (!found) {
+			for (auto it = files.begin() + pos; it != files.begin(); it--) {
+				if ((*it)->getType() == GAME) {
+					if ((*it)->metadata.get("kidgame").compare("true") == 0) {
+						view->setCursor(*it);
+						break;
+					}
+				}
+			}
+		}
+
+		if (!found) {
+			view->setCursor(*(files.begin() + pos));
+		}
+	}
+
+	view->updateInfoPanel();
 }
 
 void ViewController::playViewTransition()
@@ -216,13 +332,14 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	std::shared_ptr<IGameListView> view;
 
 	//decide type
-	bool detailed = false;
-	std::vector<FileData*> files = system->getRootFolder()->getFilesRecursive(GAME | FOLDER, false);
-	for(auto it = files.begin(); it != files.end(); it++) {
-		if(!(*it)->getThumbnailPath().empty()) {
-			detailed = true;
-			break;
-		}
+    std::vector<FileData*> files = system->getRootFolder()->getFilesRecursive(GAME | FOLDER, false, false, false);bool detailed = false;
+	if (files.size() > 0) {
+        for(auto it = files.begin(); it != files.end(); it++) {
+            if(!(*it)->getThumbnailPath().empty()) {
+                detailed = true;
+                break;
+            }
+        }
 	}
 
 	// Set what view to do based on what the system config wants -- jfk
@@ -230,7 +347,7 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	if (sViewMode == "DEFAULT") {
 		// Original Default mode, let ES decide what to choose from (besides grid view.)
 		if (detailed) {
-			view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder()));
+			view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder(), system));
 		} else {
 			view = std::shared_ptr<IGameListView>(new BasicGameListView(mWindow, system->getRootFolder()));
 		}
@@ -247,7 +364,7 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	}
 
 	if (sViewMode == "DETAILED VIEW") {
-		view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder()));
+		view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder(), system));
 	}
 
 	view->setTheme(system->getTheme());
@@ -259,6 +376,7 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	addChild(view.get());
 
 	mGameListViews[system] = view;
+	mInvalidGameList[system] = false;
 	return view;
 }
 
@@ -397,6 +515,25 @@ void ViewController::reloadAll()
 	}
 
 	updateHelpPrompts();
+}
+
+void ViewController::setInvalidGamesList(SystemData* system)
+{
+	for (auto it = mGameListViews.begin(); it != mGameListViews.end(); it++) {
+		if (system == (it->first)) {
+			mInvalidGameList[it->first] = true;
+			break;
+		}
+	}
+}
+
+void ViewController::setAllInvalidGamesList(SystemData* systemExclude)
+{
+	for (auto it = mGameListViews.begin(); it != mGameListViews.end(); it++) {
+		if (systemExclude != (it->first)) {
+			mInvalidGameList[it->first] = true;
+		}
+	}
 }
 
 std::vector<HelpPrompt> ViewController::getHelpPrompts()

@@ -23,7 +23,6 @@ public:
 	void setState(bool state);
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
-
 private:
 	void onStateChanged();
 

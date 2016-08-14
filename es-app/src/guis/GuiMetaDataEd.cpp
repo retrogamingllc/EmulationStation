@@ -12,6 +12,7 @@
 
 #include "views/ViewController.h"
 
+#include "Gamelist.h"
 #include "Renderer.h"
 #include "Log.h"
 #include "Settings.h"
@@ -187,9 +188,10 @@ void GuiMetaDataEd::save()
 		if(mMetaDataDecl.at(i).isStatistic) {
 			continue;
 		}
-
 		mMetaData->set(mMetaDataDecl.at(i).key, mEditors.at(i)->getValue());
 	}
+	LOG(LogError) << "updating XML";
+	updateGamelist(mScraperParams.system);
 
 	if(mSavedCallback) {
 		mSavedCallback();
@@ -222,6 +224,7 @@ void GuiMetaDataEd::close(bool closeAllWindows)
 		const std::string& key = mMetaDataDecl.at(i).key;
 		if(mMetaData->get(key) != mEditors.at(i)->getValue()) {
 			dirty = true;
+			LOG(LogDebug) << "   dirty!";
 			break;
 		}
 	}

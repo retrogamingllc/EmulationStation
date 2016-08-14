@@ -35,3 +35,7 @@ Makefile
 CPackConfig.cmake
 CPackSourceConfig.cmake
 
+#Netbeans files
+nbproject
+*.orig
+nbproject/private/private.xml
