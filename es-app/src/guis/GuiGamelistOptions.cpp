@@ -9,8 +9,8 @@
 #include "SystemData.h"
 #include "FileData.h"
 
-GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window), 
-	mSystem(system), 
+GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window),
+	mSystem(system),
 	mMenu(window, "OPTIONS")
 {
 	LOG(LogDebug) << "GUIGamelistOptions::GuiGamelistOptions()";
@@ -18,24 +18,23 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 
 	// jump to letter
 	char curChar = toupper(getGamelist()->getCursor()->getName()[0]);
-	if(curChar < 'A' || curChar > 'Z')
+	if(curChar < 'A' || curChar > 'Z') {
 		curChar = 'A';
+	}
 
 	mJumpToLetterList = std::make_shared<LetterList>(mWindow, "JUMP TO LETTER", false);
-	for(char c = 'A'; c <= 'Z'; c++)
+	for(char c = 'A'; c <= 'Z'; c++) {
 		mJumpToLetterList->add(std::string(1, c), c, c == curChar);
+	}
 
 	ComponentListRow row;
 	row.addElement(std::make_shared<TextComponent>(mWindow, "JUMP TO LETTER", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	row.addElement(mJumpToLetterList, false);
 	row.input_handler = [&](InputConfig* config, Input input) {
-		if(config->isMappedTo("a", input) && input.value)
-		{
+		if(config->isMappedTo("a", input) && input.value) {
 			jumpToLetter();
 			return true;
-		}
-		else if(mJumpToLetterList->input(config, input))
-		{
+		} else if(mJumpToLetterList->input(config, input)) {
 			return true;
 		}
 		return false;
@@ -45,25 +44,23 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 	row.elements.clear();
 	row.addElement(std::make_shared<TextComponent>(mWindow, "SURPRISE ME!", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	row.input_handler = [&](InputConfig* config, Input input) {
-		if(config->isMappedTo("a", input) && input.value)
-		{
+		if(config->isMappedTo("a", input) && input.value) {
 			SurpriseMe();
 			return true;
 		}
 		return false;
 	};
 	mMenu.addRow(row);
-	
+
 	// sort list by
 	mListSort = std::make_shared<SortList>(mWindow, "SORT GAMES BY", false);
-	for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++)
-	{
+	for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++) {
 		const FileData::SortType& sort = FileSorts::SortTypes.at(i);
 		mListSort->add(sort.description, &sort, i == 0); // TODO - actually make the sort type persistent
 	}
 
 	mMenu.addWithLabel("SORT GAMES BY", mListSort);
-	
+
 	// Show favorites-only
 	auto favorite_only = std::make_shared<SwitchComponent>(mWindow);
 	favorite_only->setState(Settings::getInstance()->getBool("FavoritesOnly"));
@@ -72,23 +69,20 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 		if(favorite_only->getState())
 		{
 			bool filterHidden = ((Settings::getInstance()->getString("UIMode") == "Kiosk") ||
-								 (Settings::getInstance()->getString("UIMode") == "Kid"));
+			(Settings::getInstance()->getString("UIMode") == "Kid"));
 			bool filterKid = (Settings::getInstance()->getString("UIMode") == "Kid");
 			bool hasFavorite = false;
-			
+
 			// check if there is anything at all to show, otherwise revert
-			for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++)
-			{
-				if( (*it)->getGameCount(filterHidden, favorite_only->getState(), filterKid) > 0 )
-				{
+			for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++) {
+				if( (*it)->getGameCount(filterHidden, favorite_only->getState(), filterKid) > 0 ) {
 					hasFavorite = true;
 					break;
 				}
 			}
-			if(!hasFavorite)
-			{
+			if(!hasFavorite) {
 				LOG(LogDebug) << "Nothing to show in selected favorites mode, resetting";
-				favorite_only->setState(false);			
+				favorite_only->setState(false);
 			}
 		}
 		if(favorite_only->getState() != Settings::getInstance()->getBool("FavoritesOnly"))
@@ -97,10 +91,9 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 			mFavoriteStateChanged = true;
 		}
 	});
-	
+
 	// edit game metadata - only in Full UI mode
-	if(Settings::getInstance()->getString("UIMode") == "Full")
-	{
+	if(Settings::getInstance()->getString("UIMode") == "Full") {
 		row.elements.clear();
 		row.addElement(std::make_shared<TextComponent>(mWindow, "EDIT THIS GAME'S METADATA", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 		row.addElement(makeArrow(mWindow), false);
@@ -119,12 +112,11 @@ GuiGamelistOptions::~GuiGamelistOptions()
 	// apply sort
 	FileData* root = getGamelist()->getCursor()->getSystem()->getRootFolder();
 	root->sort(*mListSort->getSelected()); // will also recursively sort children
-	
+
 	// notify that the root folder was sorted
-	
-	getGamelist()->onFileChanged(root, FILE_SORTED);				
-	if (mFavoriteStateChanged)
-	{
+
+	getGamelist()->onFileChanged(root, FILE_SORTED);
+	if (mFavoriteStateChanged) {
 		LOG(LogDebug) << "  GUIGamelistOptions::~GuiGamelistOptions(): FavoriteStateChanged, reloading GameList";
 		ViewController::get()->setAllInvalidGamesList(getGamelist()->getCursor()->getSystem());
 		//ViewController::get()->reloadGameListView(getGamelist()->getCursor()->getSystem());
@@ -139,9 +131,9 @@ void GuiGamelistOptions::openMetaDataEd()
 	ScraperSearchParams p;
 	p.game = file;
 	p.system = file->getSystem();
-	mWindow->pushGui(new GuiMetaDataEd(mWindow, &file->metadata, file->metadata.getMDD(), p, file->getPath().filename().string(), 
-		std::bind(&IGameListView::onFileChanged, getGamelist(), file, FILE_METADATA_CHANGED), [this, file] { 
-			getGamelist()->remove(file);
+	mWindow->pushGui(new GuiMetaDataEd(mWindow, &file->metadata, file->metadata.getMDD(), p, file->getPath().filename().string(),
+	std::bind(&IGameListView::onFileChanged, getGamelist(), file, FILE_METADATA_CHANGED), [this, file] {
+		getGamelist()->remove(file);
 	}));
 }
 
@@ -152,27 +144,28 @@ void GuiGamelistOptions::jumpToLetter()
 
 	// this is a really shitty way to get a list of files
 	const std::vector<FileData*>& files = gamelist->getCursor()->getParent()->getChildren();
-	
+
 	long min = 0;
 	long max = files.size() - 1;
 	long mid = 0;
 
-	while(max >= min)
-	{
+	while(max >= min) {
 		mid = ((max - min) / 2) + min;
 
 		// game somehow has no first character to check
-		if(files.at(mid)->getName().empty())
+		if(files.at(mid)->getName().empty()) {
 			continue;
+		}
 
 		char checkLetter = toupper(files.at(mid)->getName()[0]);
 
-		if(checkLetter < letter)
+		if(checkLetter < letter) {
 			min = mid + 1;
-		else if(checkLetter > letter)
+		} else if(checkLetter > letter) {
 			max = mid - 1;
-		else
-			break; //exact match found
+		} else {
+			break;    //exact match found
+		}
 	}
 
 	gamelist->setCursor(files.at(mid));
@@ -182,11 +175,10 @@ void GuiGamelistOptions::jumpToLetter()
 
 bool GuiGamelistOptions::input(InputConfig* config, Input input)
 {
-	if((config->isMappedTo("b", input) || config->isMappedTo("select", input)) && input.value)
-	{
+	if((config->isMappedTo("b", input) || config->isMappedTo("select", input)) && input.value) {
 		save();
 		delete this;
-		return true;		
+		return true;
 	}
 
 	return mMenu.input(config, input);
@@ -206,11 +198,13 @@ IGameListView* GuiGamelistOptions::getGamelist()
 
 void GuiGamelistOptions::save()
 {
-	if (!mSaveFuncs.size())
+	if (!mSaveFuncs.size()) {
 		return;
+	}
 
-	for (auto it = mSaveFuncs.begin(); it != mSaveFuncs.end(); it++)
+	for (auto it = mSaveFuncs.begin(); it != mSaveFuncs.end(); it++) {
 		(*it)();
+	}
 
 	Settings::getInstance()->saveFile();
 }
@@ -218,7 +212,7 @@ void GuiGamelistOptions::save()
 void GuiGamelistOptions::SurpriseMe()
 {
 	LOG(LogDebug) << "GuiGamelistOptions::SurpriseMe()";
-	bool filterKid = (Settings::getInstance()->getString("UIMode") == "Kid");	
+	bool filterKid = (Settings::getInstance()->getString("UIMode") == "Kid");
 	ViewController::get()->goToRandomGame(true, false, filterKid);
 	delete this;
 }

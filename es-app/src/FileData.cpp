@@ -18,16 +18,13 @@ std::string removeParenthesis(const std::string& str)
 	static const char toReplace[NUM_TO_REPLACE*2] = { '(', ')', '[', ']' };
 
 	bool done = false;
-	while(!done)
-	{
+	while(!done) {
 		done = true;
-		for(int i = 0; i < NUM_TO_REPLACE; i++)
-		{
+		for(int i = 0; i < NUM_TO_REPLACE; i++) {
 			end = ret.find_first_of(toReplace[i*2+1]);
 			start = ret.find_last_of(toReplace[i*2], end);
 
-			if(start != std::string::npos && end != std::string::npos)
-			{
+			if(start != std::string::npos && end != std::string::npos) {
 				ret.erase(start, end - start + 1);
 				done = false;
 			}
@@ -36,8 +33,9 @@ std::string removeParenthesis(const std::string& str)
 
 	// also strip whitespace
 	end = ret.find_last_not_of(' ');
-	if(end != std::string::npos)
+	if(end != std::string::npos) {
 		end++;
+	}
 
 	ret = ret.substr(0, end);
 
@@ -49,24 +47,28 @@ FileData::FileData(FileType type, const fs::path& path, SystemData* system)
 	: mType(type), mPath(path), mSystem(system), mParent(NULL), metadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
 {
 	// metadata needs at least a name field (since that's what getName() will return)
-	if(metadata.get("name").empty())
+	if(metadata.get("name").empty()) {
 		metadata.set("name", getDisplayName());
+	}
 }
 
 FileData::~FileData()
 {
-	if(mParent)
+	if(mParent) {
 		mParent->removeChild(this);
+	}
 
-	while(mChildren.size())
+	while(mChildren.size()) {
 		delete mChildren.back();
+	}
 }
 
 std::string FileData::getDisplayName() const
 {
 	std::string stem = mPath.stem().generic_string();
-	if(mSystem && mSystem->hasPlatformId(PlatformIds::ARCADE) || mSystem->hasPlatformId(PlatformIds::NEOGEO))
+	if(mSystem && mSystem->hasPlatformId(PlatformIds::ARCADE) || mSystem->hasPlatformId(PlatformIds::NEOGEO)) {
 		stem = PlatformIds::getCleanMameName(stem.c_str());
+	}
 
 	return stem;
 }
@@ -78,43 +80,40 @@ std::string FileData::getCleanName() const
 
 const std::string& FileData::getThumbnailPath() const
 {
-	if(!metadata.get("thumbnail").empty())
+	if(!metadata.get("thumbnail").empty()) {
 		return metadata.get("thumbnail");
-	else
+	} else {
 		return metadata.get("image");
+	}
 }
 
 
 std::vector<FileData*> FileData::getFilesRecursive(unsigned int typeMask, bool filterHidden, bool filterFav, bool filterKid) const
 {
 	//LOG(LogDebug) << "FileData::getFilesRecursive(" << filterHidden << filterFav << filterKid << ")";
-		std::vector<FileData*> fileList;
+	std::vector<FileData*> fileList;
 
 	// first populate with all we can find
-	for(auto it = mChildren.begin(); it != mChildren.end(); it++)
-	{
-		if((*it)->getType() & typeMask)
+	for(auto it = mChildren.begin(); it != mChildren.end(); it++) {
+		if((*it)->getType() & typeMask) {
 			fileList.push_back(*it);
-		
-		if((*it)->getChildren().size() > 0)
-		{
+		}
+
+		if((*it)->getChildren().size() > 0) {
 			//LOG(LogDebug) << "FileData::getFilesRecursive(): Recursing!";
 			std::vector<FileData*> subchildren = (*it)->getFilesRecursive(typeMask, filterHidden, filterFav, filterKid);
 			fileList.insert(fileList.end(), subchildren.cbegin(), subchildren.cend());
 		}
 	}
-		
+
 	// then filter out all we do not want.
-	if(filterHidden)
-	{
+	if(filterHidden) {
 		fileList = filterFileData(fileList, "hidden", "false");
 	}
-	if(filterFav)
-	{
+	if(filterFav) {
 		fileList = filterFileData(fileList, "favorite", "true");
 	}
-	if(filterKid)
-	{
+	if(filterKid) {
 		fileList = filterFileData(fileList, "kidgame", "true");
 	}
 	//LOG(LogDebug) << "   Found " << fileList.size() << " games";
@@ -125,15 +124,11 @@ std::vector<FileData*> FileData::filterFileData(std::vector<FileData*> in, std::
 {
 	std::vector<FileData*> out;
 
-	for (auto it = in.begin(); it != in.end(); it++)
-	{
-		if((*it)->getType() == FOLDER)
-		{
+	for (auto it = in.begin(); it != in.end(); it++) {
+		if((*it)->getType() == FOLDER) {
 			out.push_back(*it); // for now just include all subfolders, even though they might be empty.
-		}else
-		{
-			if ((*it)->metadata.get(filtername).compare(passString) == 0)
-			{
+		} else {
+			if ((*it)->metadata.get(filtername).compare(passString) == 0) {
 				out.push_back(*it);
 			}
 		}
@@ -156,10 +151,8 @@ void FileData::removeChild(FileData* file)
 	assert(mType == FOLDER);
 	assert(file->getParent() == this);
 
-	for(auto it = mChildren.begin(); it != mChildren.end(); it++)
-	{
-		if(*it == file)
-		{
+	for(auto it = mChildren.begin(); it != mChildren.end(); it++) {
+		if(*it == file) {
 			mChildren.erase(it);
 			return;
 		}
@@ -173,14 +166,15 @@ void FileData::sort(ComparisonFunction& comparator, bool ascending)
 {
 	std::sort(mChildren.begin(), mChildren.end(), comparator);
 
-	for(auto it = mChildren.begin(); it != mChildren.end(); it++)
-	{
-		if((*it)->getChildren().size() > 0)
+	for(auto it = mChildren.begin(); it != mChildren.end(); it++) {
+		if((*it)->getChildren().size() > 0) {
 			(*it)->sort(comparator, ascending);
+		}
 	}
 
-	if(!ascending)
+	if(!ascending) {
 		std::reverse(mChildren.begin(), mChildren.end());
+	}
 }
 
 void FileData::sort(const SortType& type)
@@ -191,18 +185,20 @@ void FileData::sort(const SortType& type)
 FileData* FileData::getRandom(bool filterHidden, bool filterFav, bool filterKid) const
 {
 	LOG(LogDebug) << "FileData::getRandom("<< filterHidden << ", " << filterFav << ", " << filterKid << ")";
-	
+
 	//Get list of files
 	std::vector<FileData*> list = getFilesRecursive(GAME,filterHidden, filterFav, filterKid);
 	const unsigned long n = list.size();
 	LOG(LogDebug) << "   found games: " << n;
-	
+
 	//Select random system
 	//const unsigned long divisor = (RAND_MAX + 1) / n;
 	const unsigned long divisor = (RAND_MAX) / n; // the above is correct, but gives compiler warning.
 	unsigned long k;
-	do { k = std::rand() / divisor; } while (k >= n); // pick the first within range
-	
+	do {
+		k = std::rand() / divisor;
+	} while (k >= n); // pick the first within range
+
 	LOG(LogDebug) << "   Picked game: " << list.at(k)->getName();
-	return list.at(k);	
+	return list.at(k);
 }

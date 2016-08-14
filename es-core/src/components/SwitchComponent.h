@@ -20,7 +20,7 @@ public:
 	void setValue(const std::string& statestring) override;
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
-	private:
+private:
 	void onStateChanged();
 
 	ImageComponent mImage;

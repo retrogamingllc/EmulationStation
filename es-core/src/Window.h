@@ -28,10 +28,13 @@ public:
 
 	void normalizeNextUpdate();
 
-	inline bool isSleeping() const { return mSleeping; }
+	inline bool isSleeping() const
+	{
+		return mSleeping;
+	}
 	bool getAllowSleep();
 	void setAllowSleep(bool sleep);
-	
+
 	void renderLoadingScreen();
 
 	void renderHelpPromptsEarly(); // used to render HelpPrompts before a fade
@@ -61,7 +64,7 @@ private:
 	unsigned int mTimeSinceLastInput;
 
 	bool mRenderedHelpPrompts;
-	
+
 	void ListenForPassKeySequence(InputConfig* config, Input input);
 	int mPasskeyCounter;
 	bool mRestartNeeded;

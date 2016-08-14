@@ -28,8 +28,7 @@ void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 {
-	if(change == FILE_METADATA_CHANGED)
-	{
+	if(change == FILE_METADATA_CHANGED) {
 		// might switch to a detailed view
 		ViewController::get()->reloadGameListView(this);
 		return;
@@ -47,105 +46,86 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 
 	bool filterFav = false;
 	bool hasKidGames = false;
-	
-	if (Settings::getInstance()->getBool("FavoritesOnly"))
-	{
-		for (auto it = files.begin(); it != files.end(); it++)
-		{
-			if ( ((*it)->getType() == GAME) && ((*it)->metadata.get("favorite").compare("true") == 0) )
-			{
+
+	if (Settings::getInstance()->getBool("FavoritesOnly")) {
+		for (auto it = files.begin(); it != files.end(); it++) {
+			if ( ((*it)->getType() == GAME) && ((*it)->metadata.get("favorite").compare("true") == 0) ) {
 				filterFav = true;
 				break;
 			}
 		}
 	}
-	if (Settings::getInstance()->getString("UIMode") == "Kid")
-	{
-		for (auto it = files.begin(); it != files.end(); it++)
-		{
-			if ( ((*it)->getType() == GAME) && ((*it)->metadata.get("kidgame").compare("true") == 0) )
-			{
+	if (Settings::getInstance()->getString("UIMode") == "Kid") {
+		for (auto it = files.begin(); it != files.end(); it++) {
+			if ( ((*it)->getType() == GAME) && ((*it)->metadata.get("kidgame").compare("true") == 0) ) {
 				hasKidGames = true;
 				break;
 			}
 		}
 	}
-	
+
 	// Read in UIMode, store in an int for ease of switching.
 	// Default behavior is mode = full (showing everything)
 	int UIMode_int = 0;
-	if ( (Settings::getInstance()->getString("UIMode") == "Kid") && hasKidGames )
+	if ( (Settings::getInstance()->getString("UIMode") == "Kid") && hasKidGames ) {
 		UIMode_int = 1;
-	if (Settings::getInstance()->getString("UIMode") == "Kiosk")
+	}
+	if (Settings::getInstance()->getString("UIMode") == "Kiosk") {
 		UIMode_int = 2;
-	
+	}
+
 	//LOG(LogDebug)<< "BasicGameListView::populateList(): UIMode_int = " << UIMode_int;
 	//LOG(LogDebug)<< "BasicGameListView::populateList(): filterFav = "<< filterFav;
 	//LOG(LogDebug)<< "BasicGameListView::populateList(): hasKidGames = "<< hasKidGames;
 	//LOG(LogDebug)<< "BasicGameListView::populateList(): nr of items in list = "<< files.size();
-	// loop over all files and populate depending on UIMode	
+	// loop over all files and populate depending on UIMode
 	int cnt = 0;
-	for(auto it = files.begin(); it != files.end(); it++)
-	{
-		if ((*it)->getType() == GAME)
-		{
-			switch (UIMode_int)
-			{
-				case 2: // Kiosk mode: Filter hidden items
-					if (filterFav)
-					{
-						if(((*it)->metadata.get("favorite").compare("true") == 0) &&
-						   ((*it)->metadata.get("hidden").compare("false") == 0))
-						{
-							mList.add((*it)->getName(), *it, 0);
-							cnt++;
-						}
-					}else 
-					{
-						if((*it)->metadata.get("hidden").compare("false") == 0)
-						{
-							mList.add((*it)->getName(), *it, 0);
-							cnt++;
-						}
-					}	
-					break;
-				case 1: // Kid mode: Filter all items non kid-game
-					if (filterFav)
-					{
-						if(((*it)->metadata.get("favorite").compare("true") == 0) &&
-						   ((*it)->metadata.get("hidden").compare("false") == 0) &&
-						   ((*it)->metadata.get("kidgame").compare("true") == 0))
-						{
-							mList.add((*it)->getName(), *it, 0);
-							cnt++;
-						}
-					}else 
-					{
-						if(((*it)->metadata.get("hidden").compare("false") == 0) &&
-						   ((*it)->metadata.get("kidgame").compare("true") == 0))
-						{
-							mList.add((*it)->getName(), *it, 0);
-							cnt++;
-						}
-					}
-					break;
-				case 0: // Full mode: show all
-					if (filterFav)
-					{
-						if((*it)->metadata.get("favorite").compare("true") == 0)
-						{
-							mList.add((*it)->getName(), *it, 0);
-							cnt++;
-						}
-					}else 
-					{
+	for(auto it = files.begin(); it != files.end(); it++) {
+		if ((*it)->getType() == GAME) {
+			switch (UIMode_int) {
+			case 2: // Kiosk mode: Filter hidden items
+				if (filterFav) {
+					if(((*it)->metadata.get("favorite").compare("true") == 0) &&
+							((*it)->metadata.get("hidden").compare("false") == 0)) {
 						mList.add((*it)->getName(), *it, 0);
 						cnt++;
 					}
-					break;
+				} else {
+					if((*it)->metadata.get("hidden").compare("false") == 0) {
+						mList.add((*it)->getName(), *it, 0);
+						cnt++;
+					}
+				}
+				break;
+			case 1: // Kid mode: Filter all items non kid-game
+				if (filterFav) {
+					if(((*it)->metadata.get("favorite").compare("true") == 0) &&
+							((*it)->metadata.get("hidden").compare("false") == 0) &&
+							((*it)->metadata.get("kidgame").compare("true") == 0)) {
+						mList.add((*it)->getName(), *it, 0);
+						cnt++;
+					}
+				} else {
+					if(((*it)->metadata.get("hidden").compare("false") == 0) &&
+							((*it)->metadata.get("kidgame").compare("true") == 0)) {
+						mList.add((*it)->getName(), *it, 0);
+						cnt++;
+					}
+				}
+				break;
+			case 0: // Full mode: show all
+				if (filterFav) {
+					if((*it)->metadata.get("favorite").compare("true") == 0) {
+						mList.add((*it)->getName(), *it, 0);
+						cnt++;
+					}
+				} else {
+					mList.add((*it)->getName(), *it, 0);
+					cnt++;
+				}
+				break;
 			}
-		}else // its a folder!
-		{
+		} else { // its a folder!
 			mList.add((*it)->getName(), *it, 1);
 			cnt++;
 			//LOG(LogDebug)<< "BasicGameListView::populateList(): Adding folder: " << (*it)->getName();
@@ -161,26 +141,22 @@ FileData* BasicGameListView::getCursor()
 
 void BasicGameListView::setCursor(FileData* cursor)
 {
-	if(!mList.setCursor(cursor))
-	{
+	if(!mList.setCursor(cursor)) {
 		populateList(cursor->getParent()->getChildren());
 		mList.setCursor(cursor);
 
 		// update our cursor stack in case our cursor just got set to some folder we weren't in before
-		if(mCursorStack.empty() || mCursorStack.top() != cursor->getParent())
-		{
+		if(mCursorStack.empty() || mCursorStack.top() != cursor->getParent()) {
 			std::stack<FileData*> tmp;
 			FileData* ptr = cursor->getParent();
-			while(ptr && ptr != mRoot)
-			{
+			while(ptr && ptr != mRoot) {
 				tmp.push(ptr);
 				ptr = ptr->getParent();
 			}
-			
+
 			// flip the stack and put it in mCursorStack
 			mCursorStack = std::stack<FileData*>();
-			while(!tmp.empty())
-			{
+			while(!tmp.empty()) {
 				mCursorStack.push(tmp.top());
 				tmp.pop();
 			}
@@ -196,15 +172,12 @@ void BasicGameListView::launch(FileData* game)
 void BasicGameListView::remove(FileData *game)
 {
 	boost::filesystem::remove(game->getPath());  // actually delete the file on the filesystem
-	if (getCursor() == game)                     // Select next element in list, or prev if none
-	{
+	if (getCursor() == game) {                   // Select next element in list, or prev if none
 		std::vector<FileData*> siblings = game->getParent()->getChildren();
 		auto gameIter = std::find(siblings.begin(), siblings.end(), game);
 		auto gamePos = std::distance(siblings.begin(), gameIter);
-		if (gameIter != siblings.end())
-		{
-			if ((gamePos + 1) < siblings.size())
-			{
+		if (gameIter != siblings.end()) {
+			if ((gamePos + 1) < siblings.size()) {
 				setCursor(siblings.at(gamePos + 1));
 			} else if ((gamePos - 1) > 0) {
 				setCursor(siblings.at(gamePos - 1));
@@ -219,8 +192,9 @@ std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
 
-	if(Settings::getInstance()->getBool("QuickSystemSelect"))
+	if(Settings::getInstance()->getBool("QuickSystemSelect")) {
 		prompts.push_back(HelpPrompt("left/right", "system"));
+	}
 	prompts.push_back(HelpPrompt("up/down", "choose"));
 	prompts.push_back(HelpPrompt("a", "launch"));
 	prompts.push_back(HelpPrompt("b", "back"));

@@ -9,13 +9,13 @@
 #include "Log.h"
 
 ISimpleGameListView::ISimpleGameListView(Window* window, FileData* root) : IGameListView(window, root),
-mHeaderText(window), mHeaderImage(window), mBackground(window), mThemeExtras(window), mFavoriteChange(false), mKidGameChange(false)
+	mHeaderText(window), mHeaderImage(window), mBackground(window), mThemeExtras(window), mFavoriteChange(false), mKidGameChange(false)
 {
 	mHeaderText.setText("Logo Text");
 	mHeaderText.setSize(mSize.x(), 0);
 	mHeaderText.setPosition(0, 0);
 	mHeaderText.setAlignment(ALIGN_CENTER);
-	
+
 	mHeaderImage.setResize(0, mSize.y() * 0.185f);
 	mHeaderImage.setOrigin(0.5f, 0.0f);
 	mHeaderImage.setPosition(mSize.x() / 2, 0);
@@ -26,7 +26,7 @@ mHeaderText(window), mHeaderImage(window), mBackground(window), mThemeExtras(win
 	addChild(&mBackground);
 	addChild(&mThemeExtras);
 	mFilterHidden = ((Settings::getInstance()->getString("UIMode") == "Kiosk") ||
-						  (Settings::getInstance()->getString("UIMode") == "Kid"));
+					 (Settings::getInstance()->getString("UIMode") == "Kid"));
 	mFilterFav = Settings::getInstance()->getBool("FavoritesOnly");
 	mFilterKid = (Settings::getInstance()->getString("UIMode") == "Kid");
 }
@@ -39,11 +39,10 @@ void ISimpleGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme
 	mHeaderText.applyTheme(theme, getName(), "logoText", ALL);
 	mThemeExtras.setExtras(ThemeData::makeExtras(theme, getName(), mWindow));
 
-	if(mHeaderImage.hasImage())
-	{
+	if(mHeaderImage.hasImage()) {
 		removeChild(&mHeaderText);
 		addChild(&mHeaderImage);
-	}else{
+	} else {
 		addChild(&mHeaderText);
 		removeChild(&mHeaderImage);
 	}
@@ -60,39 +59,32 @@ void ISimpleGameListView::onFileChanged(FileData* file, FileChangeType change)
 
 bool ISimpleGameListView::input(InputConfig* config, Input input)
 {
-	if(input.value != 0)
-	{
-		if(config->isMappedTo("a", input))
-		{
+	if(input.value != 0) {
+		if(config->isMappedTo("a", input)) {
 			LOG(LogDebug) << "ISimpleGameListView::input(): a detected!";
 			FileData* cursor = getCursor();
-			if(cursor->getType() == GAME)
-			{
+			if(cursor->getType() == GAME) {
 				Sound::getFromTheme(getTheme(), getName(), "launch")->play();
 				launch(cursor);
-			}else{
+			} else {
 				// it's a folder
-				if(cursor->getChildren().size() > 0)
-				{
+				if(cursor->getChildren().size() > 0) {
 					mCursorStack.push(cursor);
 					populateList(cursor->getChildren());
 				}
 			}
-				
+
 			return true;
-		}else if(config->isMappedTo("b", input))
-		{
+		} else if(config->isMappedTo("b", input)) {
 			LOG(LogDebug) << "ISimpleGameListView::input(): b detected!";
-			if(mCursorStack.size())
-			{
+			if(mCursorStack.size()) {
 				populateList(mCursorStack.top()->getParent()->getChildren());
 				setCursor(mCursorStack.top());
 				mCursorStack.pop();
 				Sound::getFromTheme(getTheme(), getName(), "back")->play();
-			}else{
+			} else {
 				onFocusLost();
-				if (mFavoriteChange || mKidGameChange)
-				{
+				if (mFavoriteChange || mKidGameChange) {
 					ViewController::get()->setInvalidGamesList(getCursor()->getSystem());
 					mFavoriteChange = false;
 					mKidGameChange = false;
@@ -101,59 +93,46 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}
 
 			return true;
-		}else if (config->isMappedTo("x", input))
-		{
+		} else if (config->isMappedTo("x", input)) {
 			FileData* cursor = getCursor();
 			LOG(LogDebug) << "ISimpleGameListView::input(): x detected!";
-			if (cursor->getSystem()->getHasFavorites())
-			{
-				if (cursor->getType() == GAME)
-				{
+			if (cursor->getSystem()->getHasFavorites()) {
+				if (cursor->getType() == GAME) {
 					mFavoriteChange = true;
 					MetaDataList* md = &cursor->metadata;
 					std::string value = md->get("favorite");
 					LOG(LogDebug) << "Favorite = "<< value;
-					if (value.compare("false") == 0)
-					{
+					if (value.compare("false") == 0) {
 						md->set("favorite", "true");
-					}else
-					{
+					} else {
 						md->set("favorite", "false");
 					}
 					LOG(LogDebug) << "New Favorite value set to: "<< md->get("favorite");
 					updateInfoPanel();
 				}
 			}
-		}else if (config->isMappedTo("y", input))
-		{
+		} else if (config->isMappedTo("y", input)) {
 			LOG(LogDebug) << "ISimpleGameListView::input(): y detected!";
 			FileData* cursor = getCursor();
-			if (cursor->getSystem()->getHasKidGames() && !mFilterHidden) // only when kidgames are supported by system+theme, and when in UImode=full
-			{
-				if (cursor->getType() == GAME)
-				{
+			if (cursor->getSystem()->getHasKidGames() && !mFilterHidden) { // only when kidgames are supported by system+theme, and when in UImode=full
+				if (cursor->getType() == GAME) {
 					mKidGameChange = true;
 					MetaDataList* md = &cursor->metadata;
 					std::string value = md->get("kidgame");
 					LOG(LogDebug) << "kidgame = "<< value;
-					if (value.compare("false") == 0)
-					{
+					if (value.compare("false") == 0) {
 						md->set("kidgame", "true");
-					}					else
-					{
+					}					else {
 						md->set("kidgame", "false");
 					}
 					LOG(LogDebug) << "New kidgame value set to: "<< md->get("kidgame");
 					updateInfoPanel();
 				}
 			}
-		}else if(config->isMappedTo("right", input))
-		{
-			if(Settings::getInstance()->getBool("QuickSystemSelect"))
-			{
+		} else if(config->isMappedTo("right", input)) {
+			if(Settings::getInstance()->getBool("QuickSystemSelect")) {
 				onFocusLost();
-				if (mFavoriteChange || mKidGameChange)
-				{
+				if (mFavoriteChange || mKidGameChange) {
 					ViewController::get()->setInvalidGamesList(getCursor()->getSystem());
 					mFavoriteChange = false;
 					mKidGameChange = false;
@@ -161,13 +140,10 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				ViewController::get()->goToNextGameList(mFilterHidden, mFilterFav, mFilterKid);
 				return true;
 			}
-		}else if(config->isMappedTo("left", input))
-		{
-			if(Settings::getInstance()->getBool("QuickSystemSelect"))
-			{
+		} else if(config->isMappedTo("left", input)) {
+			if(Settings::getInstance()->getBool("QuickSystemSelect")) {
 				onFocusLost();
-				if (mFavoriteChange || mKidGameChange)
-				{
+				if (mFavoriteChange || mKidGameChange) {
 					ViewController::get()->setInvalidGamesList(getCursor()->getSystem());
 					mFavoriteChange = false;
 					mKidGameChange = false;

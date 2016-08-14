@@ -45,7 +45,7 @@ public:
 	void setSize(const Eigen::Vector2f& size);
 	void setSize(float w, float h);
 	virtual void onSizeChanged() {};
-	
+
 	void setParent(GuiComponent* parent);
 	GuiComponent* getParent() const;
 
@@ -83,11 +83,14 @@ public:
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties);
 
 	// Returns a list of help prompts.
-	virtual std::vector<HelpPrompt> getHelpPrompts() { return std::vector<HelpPrompt>(); };
+	virtual std::vector<HelpPrompt> getHelpPrompts()
+	{
+		return std::vector<HelpPrompt>();
+	};
 
 	// Called whenever help prompts change.
 	void updateHelpPrompts();
-	
+
 	virtual HelpStyle getHelpStyle();
 
 	virtual inline void setScrollDir(int dir) {}

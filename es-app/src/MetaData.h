@@ -7,8 +7,7 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 
-enum MetaDataType
-{
+enum MetaDataType {
 	//generic types
 	MD_STRING,
 	MD_INT,
@@ -23,8 +22,7 @@ enum MetaDataType
 	MD_TIME //used for lastplayed
 };
 
-struct MetaDataDecl
-{
+struct MetaDataDecl {
 	std::string key;
 	MetaDataType type;
 	std::string defaultValue;
@@ -33,8 +31,7 @@ struct MetaDataDecl
 	std::string displayPrompt; // phrase displayed in editors when prompted to enter value (currently only for strings)
 };
 
-enum MetaDataListType
-{
+enum MetaDataListType {
 	GAME_METADATA,
 	FOLDER_METADATA
 };
@@ -48,7 +45,7 @@ public:
 	void appendToXML(pugi::xml_node parent, bool ignoreDefaults, const boost::filesystem::path& relativeTo) const;
 
 	MetaDataList(MetaDataListType type);
-	
+
 	void set(const std::string& key, const std::string& value);
 	void setTime(const std::string& key, const boost::posix_time::ptime& time); //times are internally stored as ISO strings (e.g. boost::posix_time::to_iso_string(ptime))
 
@@ -57,8 +54,14 @@ public:
 	float getFloat(const std::string& key) const;
 	boost::posix_time::ptime getTime(const std::string& key) const;
 
-	inline MetaDataListType getType() const { return mType; }
-	inline const std::vector<MetaDataDecl>& getMDD() const { return getMDDByType(getType()); }
+	inline MetaDataListType getType() const
+	{
+		return mType;
+	}
+	inline const std::vector<MetaDataDecl>& getMDD() const
+	{
+		return getMDDByType(getType());
+	}
 
 private:
 	MetaDataListType mType;

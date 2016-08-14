@@ -24,7 +24,7 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 
 	mSystemInfo.setSize(mSize.x(), mSystemInfo.getSize().y() * 1.333f);
 	mSystemInfo.setPosition(0, (mSize.y() + BAND_HEIGHT) / 2);
-		
+
 	populate();
 }
 
@@ -33,15 +33,13 @@ void SystemView::populate()
 	LOG(LogDebug) << "SystemView::populate()";
 	bool filterHidden = false;
 	bool filterKid = false;
-	if (Settings::getInstance()->getString("UIMode") != "Full")
-	{
+	if (Settings::getInstance()->getString("UIMode") != "Full") {
 		filterHidden = true;
 	}
-	if (Settings::getInstance()->getString("UIMode") == "Kid")
-	{
+	if (Settings::getInstance()->getString("UIMode") == "Kid") {
 		filterKid = true;
 	}
-	
+
 	bool filterFav = Settings::getInstance()->getBool("FavoritesOnly");
 
 	LOG(LogDebug) << "    Settings.UIMode  = " << Settings::getInstance()->getString("UIMode");
@@ -49,16 +47,14 @@ void SystemView::populate()
 	LOG(LogDebug) << "    filterHidden = " << filterHidden;
 	LOG(LogDebug) << "    filterFav = " << filterFav;
 	LOG(LogDebug) << "    filterKid = " << filterKid;
-	
+
 	mEntries.clear();
-	for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++)
-	{
+	for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++) {
 		LOG(LogDebug) << "    System = " << (*it)->getName();
-		
-		if ((*it)->getGameCount(filterHidden, filterFav, filterKid) > 0)
-		{
+
+		if ((*it)->getGameCount(filterHidden, filterFav, filterKid) > 0) {
 			LOG(LogDebug) << (*it)->getGameCount(filterHidden, filterFav, filterKid) << " games found, populating.";
-			
+
 			const std::shared_ptr<ThemeData>& theme = (*it)->getTheme();
 
 			Entry e;
@@ -66,8 +62,7 @@ void SystemView::populate()
 			e.object = *it;
 
 			// make logo
-			if(theme->getElement("system", "logo", "image"))
-			{
+			if(theme->getElement("system", "logo", "image")) {
 				ImageComponent* logo = new ImageComponent(mWindow);
 				logo->setMaxSize(Eigen::Vector2f(logoSize().x(), logoSize().y()));
 				logo->applyTheme((*it)->getTheme(), "system", "logo", ThemeFlags::PATH);
@@ -77,24 +72,24 @@ void SystemView::populate()
 				ImageComponent* logoSelected = new ImageComponent(mWindow);
 				logoSelected->setMaxSize(Eigen::Vector2f(logoSize().x() * SELECTED_SCALE, logoSize().y() * SELECTED_SCALE * 0.70f));
 				logoSelected->applyTheme((*it)->getTheme(), "system", "logo", ThemeFlags::PATH);
-				logoSelected->setPosition((logoSize().x() - logoSelected->getSize().x()) / 2, 
-					(logoSize().y() - logoSelected->getSize().y()) / 2); // center
+				logoSelected->setPosition((logoSize().x() - logoSelected->getSize().x()) / 2,
+										  (logoSize().y() - logoSelected->getSize().y()) / 2); // center
 				e.data.logoSelected = std::shared_ptr<GuiComponent>(logoSelected);
-			}else{
+			} else {
 				// no logo in theme; use text
-				TextComponent* text = new TextComponent(mWindow, 
-					(*it)->getName(), 
-					Font::get(FONT_SIZE_LARGE), 
-					0x000000FF, 
-					ALIGN_CENTER);
+				TextComponent* text = new TextComponent(mWindow,
+														(*it)->getName(),
+														Font::get(FONT_SIZE_LARGE),
+														0x000000FF,
+														ALIGN_CENTER);
 				text->setSize(logoSize());
 				e.data.logo = std::shared_ptr<GuiComponent>(text);
 
-				TextComponent* textSelected = new TextComponent(mWindow, 
-					(*it)->getName(), 
-					Font::get((int)(FONT_SIZE_LARGE * SELECTED_SCALE)), 
-					0x000000FF, 
-					ALIGN_CENTER);
+				TextComponent* textSelected = new TextComponent(mWindow,
+						(*it)->getName(),
+						Font::get((int)(FONT_SIZE_LARGE * SELECTED_SCALE)),
+						0x000000FF,
+						ALIGN_CENTER);
 				textSelected->setSize(logoSize());
 				e.data.logoSelected = std::shared_ptr<GuiComponent>(textSelected);
 			}
@@ -112,45 +107,43 @@ void SystemView::goToSystem(SystemData* system, bool animate)
 {
 	setCursor(system);
 
-	if(!animate)
+	if(!animate) {
 		finishAnimation(0);
+	}
 }
 
 bool SystemView::input(InputConfig* config, Input input)
 {
-	if(input.value != 0)
-	{
-		if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_r && SDL_GetModState() & KMOD_LCTRL && Settings::getInstance()->getBool("Debug"))
-		{
+	if(input.value != 0) {
+		if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_r && SDL_GetModState() & KMOD_LCTRL && Settings::getInstance()->getBool("Debug")) {
 			LOG(LogInfo) << "    Reloading SystemList view";
 
 			// reload themes
-			for(auto it = mEntries.begin(); it != mEntries.end(); it++)
+			for(auto it = mEntries.begin(); it != mEntries.end(); it++) {
 				it->object->loadTheme();
+			}
 
 			populate();
 			updateHelpPrompts();
 			return true;
 		}
-		if(config->isMappedTo("left", input))
-		{
+		if(config->isMappedTo("left", input)) {
 			listInput(-1);
 			return true;
 		}
-		if(config->isMappedTo("right", input))
-		{
+		if(config->isMappedTo("right", input)) {
 			listInput(1);
 			return true;
 		}
-		if(config->isMappedTo("a", input))
-		{
+		if(config->isMappedTo("a", input)) {
 			stopScrolling();
 			ViewController::get()->goToGameList(getSelected());
 			return true;
 		}
-	}else{
-		if(config->isMappedTo("left", input) || config->isMappedTo("right", input))
+	} else {
+		if(config->isMappedTo("left", input) || config->isMappedTo("right", input)) {
 			listInput(0);
+		}
 	}
 
 	return GuiComponent::input(config, input);
@@ -177,13 +170,15 @@ void SystemView::onCursorChanged(const CursorState& state)
 
 	float endPos = target; // directly
 	float dist = abs(endPos - startPos);
-	
-	if(abs(target + posMax - startPos) < dist)
-		endPos = target + posMax; // loop around the end (0 -> max)
-	if(abs(target - posMax - startPos) < dist)
-		endPos = target - posMax; // loop around the start (max - 1 -> -1)
 
-	
+	if(abs(target + posMax - startPos) < dist) {
+		endPos = target + posMax;    // loop around the end (0 -> max)
+	}
+	if(abs(target - posMax - startPos) < dist) {
+		endPos = target - posMax;    // loop around the start (max - 1 -> -1)
+	}
+
+
 	// animate mSystemInfo's opacity (fade out, wait, fade back in)
 
 	cancelAnimation(1);
@@ -192,8 +187,7 @@ void SystemView::onCursorChanged(const CursorState& state)
 	const float infoStartOpacity = mSystemInfo.getOpacity() / 255.f;
 
 	Animation* infoFadeOut = new LambdaAnimation(
-		[infoStartOpacity, this] (float t)
-	{
+	[infoStartOpacity, this] (float t) {
 		mSystemInfo.setOpacity((unsigned char)(lerp<float>(infoStartOpacity, 0.f, t) * 255));
 	}, (int)(infoStartOpacity * 150));
 
@@ -201,7 +195,7 @@ void SystemView::onCursorChanged(const CursorState& state)
 	/*unsigned int favoritesCount = getSelected()->getGameCount(false, true, false);
 	unsigned int kidgamesCount = getSelected()->getKidGamesCount();
 	unsigned int visibleCount = getSelected()->getVisibleCount();*/
-	
+
 	// also change the text after we've fully faded out
 	setAnimation(infoFadeOut, 0, [this] {
 		std::stringstream ss;
@@ -218,81 +212,57 @@ void SystemView::onCursorChanged(const CursorState& state)
 		if(Settings::getInstance()->getString("UIMode") == "Full")
 		{
 			unsigned int gameCount = getSelected()->getGameCount(false, false, false);
-			if (gameCount == 1)
-			{
+			if (gameCount == 1) {
 				ss << gameCount << " GAME";
-			}
-			else if (gameCount > 1)
-			{
+			} else if (gameCount > 1) {
 				ss << gameCount << " GAMES";
 			}
 			unsigned int favoritesCount = getSelected()->getGameCount(false, true, false);
-			if (favoritesCount == 1)
-			{
+			if (favoritesCount == 1) {
 				ss << ", " << favoritesCount << " FAVORITE";
-			}
-			else if (favoritesCount > 1)
-			{
+			} else if (favoritesCount > 1) {
 				ss << ", " << favoritesCount << " FAVORITES";
 			}
 			unsigned int kidgamesCount = getSelected()->getGameCount(false, false, true);
-			if (kidgamesCount == 1)
-			{
+			if (kidgamesCount == 1) {
 				ss << ", " << kidgamesCount << " KID-FRIENDLY GAME";
-			}
-			else if (kidgamesCount > 1)
-			{
+			} else if (kidgamesCount > 1) {
 				ss << ", " << kidgamesCount << " KID-FRIENDLY GAMES";
 			}
 			ss << " AVAILABLE.";
-		}else if(Settings::getInstance()->getString("UIMode") == "Kiosk")
+		} else if(Settings::getInstance()->getString("UIMode") == "Kiosk")
 		{
 			unsigned int gameCount = getSelected()->getGameCount(true, false, false);
-			if (gameCount == 1)
-			{
+			if (gameCount == 1) {
 				ss << gameCount << " GAME";
-			}
-			else if (gameCount > 1)
-			{
+			} else if (gameCount > 1) {
 				ss << gameCount << " GAMES";
 			}
 			unsigned int favoritesCount = getSelected()->getGameCount(true, true, false);
-			if (favoritesCount == 1)
-			{
+			if (favoritesCount == 1) {
 				ss << ", " << favoritesCount << " FAVORITE";
-			}
-			else if (favoritesCount > 1)
-			{
+			} else if (favoritesCount > 1) {
 				ss << ", " << favoritesCount << " FAVORITES";
 			}
 			unsigned int kidgamesCount = getSelected()->getGameCount(true, false, true);
-			if (kidgamesCount == 1)
-			{
+			if (kidgamesCount == 1) {
 				ss << ", " << kidgamesCount << " KID-FRIENDLY GAME";
-			}
-			else if (kidgamesCount > 1)
-			{
+			} else if (kidgamesCount > 1) {
 				ss << ", " << kidgamesCount << " KID-FRIENDLY GAMES";
 			}
 			ss << " AVAILABLE.";
-		}else if(Settings::getInstance()->getString("UIMode") == "Kid")
+		} else if(Settings::getInstance()->getString("UIMode") == "Kid")
 		{
 			unsigned int kidgamesCount = getSelected()->getGameCount(true, false, true);
-			if (kidgamesCount == 1)
-			{
+			if (kidgamesCount == 1) {
 				ss << kidgamesCount << " KID-FRIENDLY GAME";
-			}
-			else if (kidgamesCount > 1)
-			{
+			} else if (kidgamesCount > 1) {
 				ss << kidgamesCount << " KID-FRIENDLY GAMES";
 			}
 			unsigned int favoritesCount = getSelected()->getGameCount(true, true, true);
-			if (favoritesCount == 1)
-			{
+			if (favoritesCount == 1) {
 				ss << ", " << favoritesCount << " FAVORITE";
-			}
-			else if (favoritesCount > 1)
-			{
+			} else if (favoritesCount > 1) {
 				ss << ", " << favoritesCount << " FAVORITES";
 			}
 			ss << " AVAILABLE.";
@@ -302,8 +272,7 @@ void SystemView::onCursorChanged(const CursorState& state)
 	}, false, 1);
 
 	Animation* infoFadeIn = new LambdaAnimation(
-		[this](float t)
-	{
+	[this](float t) {
 		mSystemInfo.setOpacity((unsigned char)(lerp<float>(0.f, 1.f, t) * 255));
 	}, 300);
 
@@ -311,48 +280,51 @@ void SystemView::onCursorChanged(const CursorState& state)
 	setAnimation(infoFadeIn, 800, nullptr, false, 2);
 
 	// no need to animate transition, we're not going anywhere (probably mEntries.size() == 1)
-	if(endPos == mCamOffset && endPos == mExtrasCamOffset)
+	if(endPos == mCamOffset && endPos == mExtrasCamOffset) {
 		return;
+	}
 
 	Animation* anim;
-	if(Settings::getInstance()->getString("TransitionStyle") == "fade")
-	{
+	if(Settings::getInstance()->getString("TransitionStyle") == "fade") {
 		float startExtrasFade = mExtrasFadeOpacity;
 		anim = new LambdaAnimation(
-			[startExtrasFade, startPos, endPos, posMax, this](float t)
-		{
+		[startExtrasFade, startPos, endPos, posMax, this](float t) {
 			t -= 1;
 			float f = lerp<float>(startPos, endPos, t*t*t + 1);
-			if(f < 0)
+			if(f < 0) {
 				f += posMax;
-			if(f >= posMax)
+			}
+			if(f >= posMax) {
 				f -= posMax;
+			}
 
 			this->mCamOffset = f;
 
 			t += 1;
-			if(t < 0.3f)
+			if(t < 0.3f) {
 				this->mExtrasFadeOpacity = lerp<float>(0.0f, 1.0f, t / 0.3f + startExtrasFade);
-			else if(t < 0.7f)
+			} else if(t < 0.7f) {
 				this->mExtrasFadeOpacity = 1.0f;
-			else
+			} else {
 				this->mExtrasFadeOpacity = lerp<float>(1.0f, 0.0f, (t - 0.7f) / 0.3f);
+			}
 
-			if(t > 0.5f)
+			if(t > 0.5f) {
 				this->mExtrasCamOffset = endPos;
+			}
 
 		}, 500);
-	}
-	else{ // slide
+	} else { // slide
 		anim = new LambdaAnimation(
-			[startPos, endPos, posMax, this](float t)
-		{
+		[startPos, endPos, posMax, this](float t) {
 			t -= 1;
 			float f = lerp<float>(startPos, endPos, t*t*t + 1);
-			if(f < 0)
+			if(f < 0) {
 				f += posMax;
-			if(f >= posMax)
+			}
+			if(f >= posMax) {
 				f -= posMax;
+			}
 
 			this->mCamOffset = f;
 			this->mExtrasCamOffset = f;
@@ -364,30 +336,33 @@ void SystemView::onCursorChanged(const CursorState& state)
 
 void SystemView::render(const Eigen::Affine3f& parentTrans)
 {
-	if(size() == 0)
+	if(size() == 0) {
 		return;
+	}
 
 	Eigen::Affine3f trans = getTransform() * parentTrans;
-	
+
 	// draw the list elements (titles, backgrounds, logos)
 	const float logoSizeX = logoSize().x() + LOGO_PADDING;
 
 	int logoCount = (int)(mSize.x() / logoSizeX) + 2; // how many logos we need to draw
 	int center = (int)(mCamOffset);
 
-	if(mEntries.size() == 1)
+	if(mEntries.size() == 1) {
 		logoCount = 1;
+	}
 
 	// draw background extras
 	Eigen::Affine3f extrasTrans = trans;
 	int extrasCenter = (int)mExtrasCamOffset;
-	for(int i = extrasCenter - 1; i < extrasCenter + 2; i++)
-	{
+	for(int i = extrasCenter - 1; i < extrasCenter + 2; i++) {
 		int index = i;
-		while(index < 0)
+		while(index < 0) {
 			index += mEntries.size();
-		while(index >= (int)mEntries.size())
+		}
+		while(index >= (int)mEntries.size()) {
 			index -= mEntries.size();
+		}
 
 		extrasTrans.translation() = trans.translation() + Eigen::Vector3f((i - mExtrasCamOffset) * mSize.x(), 0, 0);
 
@@ -398,8 +373,7 @@ void SystemView::render(const Eigen::Affine3f& parentTrans)
 	}
 
 	// fade extras if necessary
-	if(mExtrasFadeOpacity)
-	{
+	if(mExtrasFadeOpacity) {
 		Renderer::setMatrix(trans);
 		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000000 | (unsigned char)(mExtrasFadeOpacity * 255));
 	}
@@ -413,23 +387,23 @@ void SystemView::render(const Eigen::Affine3f& parentTrans)
 	Renderer::drawRect(0.f, (mSize.y() - BAND_HEIGHT) / 2, mSize.x(), BAND_HEIGHT, 0xFFFFFFD8);
 
 	Eigen::Affine3f logoTrans = trans;
-	for(int i = center - logoCount/2; i < center + logoCount/2 + 1; i++)
-	{
+	for(int i = center - logoCount/2; i < center + logoCount/2 + 1; i++) {
 		int index = i;
-		while(index < 0)
+		while(index < 0) {
 			index += mEntries.size();
-		while(index >= (int)mEntries.size())
+		}
+		while(index >= (int)mEntries.size()) {
 			index -= mEntries.size();
+		}
 
 		logoTrans.translation() = trans.translation() + Eigen::Vector3f(i * logoSizeX + xOff, yOff, 0);
 
-		if(index == mCursor) //scale our selection up
-		{
+		if(index == mCursor) { //scale our selection up
 			// selected
 			const std::shared_ptr<GuiComponent>& comp = mEntries.at(index).data.logoSelected;
 			comp->setOpacity(0xFF);
 			comp->render(logoTrans);
-		}else{
+		} else {
 			// not selected
 			const std::shared_ptr<GuiComponent>& comp = mEntries.at(index).data.logo;
 			comp->setOpacity(0x80);

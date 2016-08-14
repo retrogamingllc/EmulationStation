@@ -6,14 +6,17 @@
 #include "components/DateTimeComponent.h"
 #include "SystemData.h"
 
-class DetailedGameListView : public BasicGameListView 
+class DetailedGameListView : public BasicGameListView
 {
 public:
 	DetailedGameListView(Window* window, FileData* root, SystemData* system);
 
 	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
 
-	virtual const char* getName() const override { return "detailed"; }
+	virtual const char* getName() const override
+	{
+		return "detailed";
+	}
 
 	virtual void updateInfoPanel() override;
 
@@ -41,7 +44,7 @@ private:
 	ImageComponent mFavorite;
 	ImageComponent mKidGame;
 	ImageComponent mHidden;
-	
+
 	std::vector<TextComponent*> getMDLabels();
 	std::vector<GuiComponent*> getMDValues();
 

@@ -33,11 +33,10 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 	// [version]
 
 	auto openScrapeNow = [this] { mWindow->pushGui(new GuiScraperStart(mWindow)); };
-	
-	if(Settings::getInstance()->getString("UIMode") == "Full")
-	{
-		addEntry("SCRAPER", 0x777777FF, true, 
-		[this, openScrapeNow] { 
+
+	if(Settings::getInstance()->getString("UIMode") == "Full") {
+		addEntry("SCRAPER", 0x777777FF, true,
+		[this, openScrapeNow] {
 			auto s = new GuiSettings(mWindow, "SCRAPER");
 
 			// scrape from
@@ -71,7 +70,7 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 		});
 	}
 
-	addEntry("SOUND SETTINGS", 0x777777FF, true, 
+	addEntry("SOUND SETTINGS", 0x777777FF, true,
 	[this] {
 		auto s = new GuiSettings(mWindow, "SOUND SETTINGS");
 
@@ -92,10 +91,9 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 		mWindow->pushGui(s);
 	});
 
-	if(Settings::getInstance()->getString("UIMode") == "Full")
-	{
+	if(Settings::getInstance()->getString("UIMode") == "Full") {
 		addEntry("UI SETTINGS", 0x777777FF, true,
-		[this] {	
+		[this] {
 			auto s = new GuiSettings(mWindow, "UI SETTINGS");
 			// UI mode
 			auto UImodeSelection = std::make_shared< OptionListComponent<std::string> >(mWindow, "UI MODE", false);
@@ -107,7 +105,7 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 				UImodeSelection->add(*it, *it, Settings::getInstance()->getString("UIMode") == *it);
 			s->addWithLabel("UI MODE", UImodeSelection);
 			Window* window = mWindow;
-			s->addSaveFunc([UImodeSelection, window] 
+			s->addSaveFunc([UImodeSelection, window]
 			{
 				LOG(LogDebug) << "Changing UI mode to" << UImodeSelection->getSelected();
 
@@ -118,35 +116,30 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 					bool filterHidden = false;
 					bool filterKid = false;
 					bool filterFav = false;
-					if (UImodeSelection->getSelected() != "Full")
-					{
+					if (UImodeSelection->getSelected() != "Full") {
 						filterHidden = true;
 					}
-					if (UImodeSelection->getSelected() == "Kid")
-					{
+					if (UImodeSelection->getSelected() == "Kid") {
 						filterKid = true;
 					}
 
 					LOG(LogDebug) << "Checking if the proposed UI mode has anything at all to show:";
-					int count = 0; 
+					int count = 0;
 
-					for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++)
-					{
+					for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++) {
 						//LOG(LogDebug) << "System = " << (*it)->getName() << ", "<< (*it)->getGameCount(filterHidden, filterFav, filterKid) << " games found";
 						count += (*it)->getGameCount(filterHidden, filterFav, filterKid);
 					}
-					if (count == 0)
-					{
+					if (count == 0) {
 						LOG(LogDebug) << "Nothing to show in selected mode (" << UImodeSelection->getSelected() << "), resetting to full";
 						window->pushGui(new GuiMsgBox(window, "The selected view mode has nothing to show,\n returning to UI mode = FULL",
-								"OK", nullptr));
+													  "OK", nullptr));
 						Settings::getInstance()->setString("UIMode", "Full");
 						needReload = false;
-					}else
-					{
+					} else {
 						Settings::getInstance()->setString("UIMode", UImodeSelection->getSelected());
 						Settings::getInstance()->setBool("FavoritesOnly", false); // reset favoritesOnly option upon mode change
-					}		
+					}
 				}
 				if(needReload)
 				{
@@ -205,17 +198,18 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 			if(!themeSets.empty())
 			{
 				auto selectedSet = themeSets.find(Settings::getInstance()->getString("ThemeSet"));
-				if(selectedSet == themeSets.end())
+				if(selectedSet == themeSets.end()) {
 					selectedSet = themeSets.begin();
+				}
 
 				auto theme_set = std::make_shared< OptionListComponent<std::string> >(mWindow, "THEME SET", false);
-				for(auto it = themeSets.begin(); it != themeSets.end(); it++)
+				for(auto it = themeSets.begin(); it != themeSets.end(); it++) {
 					theme_set->add(it->first, it->first, it == selectedSet);
+				}
 				s->addWithLabel("THEME SET", theme_set);
 
 				Window* window = mWindow;
-				s->addSaveFunc([window, theme_set] 
-				{
+				s->addSaveFunc([window, theme_set] {
 					bool needReload = false;
 					if(Settings::getInstance()->getString("ThemeSet") != theme_set->getSelected())
 						needReload = true;
@@ -229,9 +223,9 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 			mWindow->pushGui(s);
 		});
 
-		addEntry("CONFIGURE INPUT", 0x777777FF, true, 
-			[this] { 
-				mWindow->pushGui(new GuiDetectDevice(mWindow, false, nullptr));
+		addEntry("CONFIGURE INPUT", 0x777777FF, true,
+		[this] {
+			mWindow->pushGui(new GuiDetectDevice(mWindow, false, nullptr));
 		});
 		addEntry("OTHER SETTINGS", 0x777777FF, true,
 		[this] {
@@ -252,63 +246,63 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 		});
 	}
 
-	addEntry("QUIT", 0x777777FF, true, 
-		[this] {
-			auto s = new GuiSettings(mWindow, "QUIT");
-			
-			Window* window = mWindow;
+	addEntry("QUIT", 0x777777FF, true,
+	[this] {
+		auto s = new GuiSettings(mWindow, "QUIT");
 
-			ComponentListRow row;
+		Window* window = mWindow;
+
+		ComponentListRow row;
+		row.makeAcceptInputHandler([window] {
+			window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES",
+			[] {
+				if(quitES("/tmp/es-restart") != 0)
+					LOG(LogWarning) << "Restart terminated with non-zero result!";
+			}, "NO", nullptr));
+		});
+		row.addElement(std::make_shared<TextComponent>(window, "RESTART EMULATIONSTATION", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+		s->addRow(row);
+
+		row.elements.clear();
+		row.makeAcceptInputHandler([window] {
+			window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES",
+			[] {
+				if(quitES("/tmp/es-sysrestart") != 0)
+					LOG(LogWarning) << "Restart terminated with non-zero result!";
+			}, "NO", nullptr));
+		});
+		row.addElement(std::make_shared<TextComponent>(window, "RESTART SYSTEM", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+		s->addRow(row);
+
+		row.elements.clear();
+		row.makeAcceptInputHandler([window] {
+			window->pushGui(new GuiMsgBox(window, "REALLY SHUTDOWN?", "YES",
+			[] {
+				if(quitES("/tmp/es-shutdown") != 0)
+					LOG(LogWarning) << "Shutdown terminated with non-zero result!";
+			}, "NO", nullptr));
+		});
+		row.addElement(std::make_shared<TextComponent>(window, "SHUTDOWN SYSTEM", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+		s->addRow(row);
+
+		if (Settings::getInstance()->getBool("ShowExit") &&
+		((Settings::getInstance()->getString("UIMode") == "Full") ||
+		(Settings::getInstance()->getBool("Debug"))))
+		{
+			row.elements.clear();
 			row.makeAcceptInputHandler([window] {
-				window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES",
+				window->pushGui(new GuiMsgBox(window, "REALLY QUIT?", "YES",
 				[] {
-					if(quitES("/tmp/es-restart") != 0)
-						LOG(LogWarning) << "Restart terminated with non-zero result!";
+					SDL_Event ev;
+					ev.type = SDL_QUIT;
+					SDL_PushEvent(&ev);
 				}, "NO", nullptr));
 			});
-			row.addElement(std::make_shared<TextComponent>(window, "RESTART EMULATIONSTATION", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+			row.addElement(std::make_shared<TextComponent>(window, "QUIT EMULATIONSTATION", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 			s->addRow(row);
+		}
 
-			row.elements.clear();
-			row.makeAcceptInputHandler([window] {
-				window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES", 
-				[] { 
-					if(quitES("/tmp/es-sysrestart") != 0)
-						LOG(LogWarning) << "Restart terminated with non-zero result!";
-				}, "NO", nullptr));
-			});
-			row.addElement(std::make_shared<TextComponent>(window, "RESTART SYSTEM", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
-			s->addRow(row);
-
-			row.elements.clear();
-			row.makeAcceptInputHandler([window] {
-				window->pushGui(new GuiMsgBox(window, "REALLY SHUTDOWN?", "YES", 
-				[] { 
-					if(quitES("/tmp/es-shutdown") != 0)
-						LOG(LogWarning) << "Shutdown terminated with non-zero result!";
-				}, "NO", nullptr));
-			});
-			row.addElement(std::make_shared<TextComponent>(window, "SHUTDOWN SYSTEM", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
-			s->addRow(row);
-
-			if (Settings::getInstance()->getBool("ShowExit") &&
-				((Settings::getInstance()->getString("UIMode") == "Full") ||
-				 (Settings::getInstance()->getBool("Debug"))))
-			{
-				row.elements.clear();
-				row.makeAcceptInputHandler([window] {
-					window->pushGui(new GuiMsgBox(window, "REALLY QUIT?", "YES", 
-					[] { 
-						SDL_Event ev;
-						ev.type = SDL_QUIT;
-						SDL_PushEvent(&ev);
-					}, "NO", nullptr));
-				});
-				row.addElement(std::make_shared<TextComponent>(window, "QUIT EMULATIONSTATION", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
-				s->addRow(row);
-			}
-
-			mWindow->pushGui(s);
+		mWindow->pushGui(s);
 	});
 
 	mVersion.setFont(Font::get(FONT_SIZE_SMALL));
@@ -332,17 +326,16 @@ void GuiMenu::onSizeChanged()
 void GuiMenu::addEntry(const char* name, unsigned int color, bool add_arrow, const std::function<void()>& func)
 {
 	std::shared_ptr<Font> font = Font::get(FONT_SIZE_MEDIUM);
-	
+
 	// populate the list
 	ComponentListRow row;
 	row.addElement(std::make_shared<TextComponent>(mWindow, name, font, color), true);
 
-	if(add_arrow)
-	{
+	if(add_arrow) {
 		std::shared_ptr<ImageComponent> bracket = makeArrow(mWindow);
 		row.addElement(bracket, false);
 	}
-	
+
 	row.makeAcceptInputHandler(func);
 
 	mMenu.addRow(row);
@@ -350,11 +343,11 @@ void GuiMenu::addEntry(const char* name, unsigned int color, bool add_arrow, con
 
 bool GuiMenu::input(InputConfig* config, Input input)
 {
-	if(GuiComponent::input(config, input))
+	if(GuiComponent::input(config, input)) {
 		return true;
+	}
 
-	if((config->isMappedTo("b", input) || config->isMappedTo("start", input)) && input.value != 0)
-	{
+	if((config->isMappedTo("b", input) || config->isMappedTo("start", input)) && input.value != 0) {
 		delete this;
 		return true;
 	}
