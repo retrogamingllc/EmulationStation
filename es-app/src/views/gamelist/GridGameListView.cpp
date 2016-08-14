@@ -88,11 +88,14 @@ void GridGameListView::update(int deltatime) {
 	if (mReloading && mLoadFrame >= mLoadFrameKey){
 		mLoadFrame = 0;
 		if (mNextLoad < mSystem->getGameCount()) {
-			auto file = mSystem->getRootFolder()->getChildren();
-			auto it = file.at(mNextLoad);
-		
-			mGrid.add(it->getName(), it->getThumbnailPath(), it);
-			mNextLoad++;
+			// Load gamelist in until it is up to a specific point, then wait for the user to move further down
+			if (mNextLoad < mGrid.getCursorIndex() + 23 - mSystem->getGridModSize()){
+				auto file = mSystem->getRootFolder()->getChildren();
+				auto it = file.at(mNextLoad);
+
+				mGrid.add(it->getName(), it->getThumbnailPath(), it);
+				mNextLoad++;
+			}
 		}
 		else {
 			mReloading = false;

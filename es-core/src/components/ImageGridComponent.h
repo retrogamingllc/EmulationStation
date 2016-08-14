@@ -46,6 +46,7 @@ public:
 	void render(const Eigen::Affine3f& parentTrans) override;
 
 	int getEntryCount();
+	int getCursorIndex();
 
 private:
 	Eigen::Vector2f getSquareSize(std::shared_ptr<TextureResource> tex = nullptr) const
@@ -129,6 +130,11 @@ ImageGridComponent<T>::~ImageGridComponent() {
 template<typename T>
 int ImageGridComponent<T>::getEntryCount() {
 	return mTotalEntrys;
+}
+
+template<typename T>
+int ImageGridComponent<T>::getCursorIndex() {
+	return static_cast<IList< ImageGridData, T >*>(this)->getCursorIndex();
 }
 
 template<typename T>
