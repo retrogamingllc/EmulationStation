@@ -23,7 +23,7 @@ VolumeControl::VolumeControl() :
 #elif defined(WIN32) || defined(_WIN32)
 	mixerHandle(nullptr), endpointVolume(nullptr),
 #endif
-    originalVolume(0), internalVolume(0)
+	originalVolume(0), internalVolume(0)
 {
 	init();
 }

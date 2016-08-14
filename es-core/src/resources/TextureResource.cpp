@@ -13,9 +13,9 @@ std::map< TextureResource::TextureKeyType, std::weak_ptr<TextureResource> > Text
 std::list< std::weak_ptr<TextureResource> > TextureResource::sTextureList;
 
 TextureResource::TextureResource(const std::string& path, bool tile) :
-    mTextureSize(Eigen::Vector2i::Zero()),
-    mPath(path),
-    mTile(tile),
+	mTextureSize(Eigen::Vector2i::Zero()),
+	mPath(path),
+	mTile(tile),
 	mTextureID(0)
 {
 }

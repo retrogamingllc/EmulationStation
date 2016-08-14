@@ -1,6 +1,7 @@
 #include "FileData.h"
 
 #include "SystemData.h"
+#include "Log.h"
 #include "Settings.h"
 
 namespace fs = boost::filesystem;
@@ -88,24 +89,49 @@ const std::string& FileData::getThumbnailPath() const
 }
 
 
-std::vector<FileData*> FileData::getFilesRecursive(unsigned int typeMask, bool forceHidden) const
+std::vector<FileData*> FileData::getFilesRecursive(unsigned int typeMask, bool filterHidden, bool filterFav, bool filterKid) const
 {
-	std::vector<FileData*> out;
+	//LOG(LogDebug) << "FileData::getFilesRecursive(" << filterHidden << filterFav << filterKid << ")";
+	std::vector<FileData*> fileList;
 
+	// first populate with all we can find
 	for(auto it = mChildren.begin(); it != mChildren.end(); it++) {
-		if((*it)->getType() & typeMask & (!(*it)->metadata.getBool("hidden") || Settings::getInstance()->getBool("ShowHiddenFiles") || forceHidden)) {
-			if ((*it)->getParent() != NULL) {
-				if (!(*it)->getParent()->metadata.getBool("hidden") || Settings::getInstance()->getBool("ShowHiddenFiles") || forceHidden) {
-					out.push_back(*it);
-				}
-			} else {
-				out.push_back(*it);
-			}
+		if((*it)->getType() & typeMask) {
+			fileList.push_back(*it);
 		}
 
 		if((*it)->getChildren().size() > 0) {
-			std::vector<FileData*> subchildren = (*it)->getFilesRecursive(typeMask, forceHidden);
-			out.insert(out.end(), subchildren.cbegin(), subchildren.cend());
+			//LOG(LogDebug) << "FileData::getFilesRecursive(): Recursing!";
+			std::vector<FileData*> subchildren = (*it)->getFilesRecursive(typeMask, filterHidden, filterFav, filterKid);
+			fileList.insert(fileList.end(), subchildren.cbegin(), subchildren.cend());
+		}
+	}
+
+	// then filter out all we do not want.
+	if(filterHidden) {
+		fileList = filterFileData(fileList, "hidden", "false");
+	}
+	if(filterFav) {
+		fileList = filterFileData(fileList, "favorite", "true");
+	}
+	if(filterKid) {
+		fileList = filterFileData(fileList, "kidgame", "true");
+	}
+	//LOG(LogDebug) << "   Found " << fileList.size() << " games";
+	return fileList;
+}
+
+std::vector<FileData*> FileData::filterFileData(std::vector<FileData*> in, std::string filtername, std::string passString) const
+{
+	std::vector<FileData*> out;
+
+	for (auto it = in.begin(); it != in.end(); it++) {
+		if((*it)->getType() == FOLDER) {
+			out.push_back(*it); // for now just include all subfolders, even though they might be empty.
+		} else {
+			if ((*it)->metadata.get(filtername).compare(passString) == 0) {
+				out.push_back(*it);
+			}
 		}
 	}
 
@@ -155,4 +181,25 @@ void FileData::sort(ComparisonFunction& comparator, bool ascending)
 void FileData::sort(const SortType& type)
 {
 	sort(*type.comparisonFunction, type.ascending);
+}
+
+FileData* FileData::getRandom(bool filterHidden, bool filterFav, bool filterKid) const
+{
+	LOG(LogDebug) << "FileData::getRandom("<< filterHidden << ", " << filterFav << ", " << filterKid << ")";
+
+	//Get list of files
+	std::vector<FileData*> list = getFilesRecursive(GAME,filterHidden, filterFav, filterKid);
+	const unsigned long n = list.size();
+	LOG(LogDebug) << "   found games: " << n;
+
+	//Select random system
+	//const unsigned long divisor = (RAND_MAX + 1) / n;
+	const unsigned long divisor = (RAND_MAX) / n; // the above is correct, but gives compiler warning.
+	unsigned long k;
+	do {
+		k = std::rand() / divisor;
+	} while (k >= n); // pick the first within range
+
+	LOG(LogDebug) << "   Picked game: " << list.at(k)->getName();
+	return list.at(k);
 }

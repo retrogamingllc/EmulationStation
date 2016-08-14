@@ -64,6 +64,17 @@ public:
 	};
 	void setSystemViewMode(std::string newViewMode);
 
+
+	inline bool getHasFavorites() const
+	{
+		return mHasFavorites;
+	}
+	inline bool getHasKidGames() const
+	{
+		return mHasKidGames;
+	}
+
+
 	inline const std::vector<PlatformIds::PlatformId>& getPlatformIds() const
 	{
 		return mPlatformIds;
@@ -82,7 +93,7 @@ public:
 	bool hasGamelist() const;
 	std::string getThemePath() const;
 
-	unsigned int getGameCount() const;
+	unsigned int getGameCount(bool filterHidden, bool filterFav, bool filterKid) const;
 
 	void launchGame(Window* window, FileData* game);
 
@@ -123,6 +134,8 @@ public:
 		return *it;
 	}
 
+	SystemData* getRandom(bool filterHidden, bool filterFav, bool filterKid) const;
+
 	// Load or re-load theme.
 	void loadTheme();
 
@@ -141,6 +154,9 @@ private:
 	bool mSystemEnabled;
 	std::string mViewMode;		// What view mode this system will render in.
 	int mGridModSize;
+
+	bool mHasFavorites;
+	bool mHasKidGames;
 
 	void populateFolder(FileData* folder);
 

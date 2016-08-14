@@ -66,6 +66,7 @@ void Settings::setDefaults()
 	mBoolMap["HideConsole"] = true;
 	mBoolMap["QuickSystemSelect"] = true;
 	mBoolMap["SaveGamelistsOnExit"] = true;
+	mBoolMap["FavoritesOnly"] = false;
 
 	mBoolMap["Debug"] = false;
 	mBoolMap["DebugGrid"] = false;
@@ -81,6 +82,10 @@ void Settings::setDefaults()
 	mStringMap["ScreenSaverBehavior"] = "dim";
 	mStringMap["Scraper"] = "TheGamesDB";
 	mStringMap["ConfigDirectory"] = "";
+	mStringMap["UIMode"] = "Full";
+
+	//mStringMap["UIMode_passkey"] = "↑↑↓↓←→←→ba";
+	mStringMap["UIMode_passkey"] = "uuddlrlrba";
 }
 
 template <typename K, typename V>

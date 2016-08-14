@@ -243,6 +243,7 @@ bool InputManager::parseEvent(const SDL_Event& ev, Window* window)
 
 bool InputManager::loadInputConfig(InputConfig* config)
 {
+	LOG(LogDebug) << "InputManager::loadInputConfig() ";
 	std::string path = getConfigPath();
 	if(!fs::exists(path)) {
 		return false;
@@ -269,6 +270,7 @@ bool InputManager::loadInputConfig(InputConfig* config)
 		return false;
 	}
 
+	LOG(LogDebug) << "    Trying to load: " << configNode;
 	config->loadFromXML(configNode);
 	return true;
 }
@@ -277,6 +279,8 @@ bool InputManager::loadInputConfig(InputConfig* config)
 //allows the user to select to reconfigure in menus if this happens without having to delete es_input.cfg manually
 void InputManager::loadDefaultKBConfig()
 {
+	LOG(LogDebug) << "InputManager::loadDefaultKBConfig() ";
+
 	InputConfig* cfg = getInputConfigByDevice(DEVICE_KEYBOARD);
 
 	cfg->clear();
@@ -289,11 +293,12 @@ void InputManager::loadDefaultKBConfig()
 	cfg->mapInput("b", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_ESCAPE, 1, true));
 	cfg->mapInput("start", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_F1, 1, true));
 	cfg->mapInput("select", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_F2, 1, true));
+	cfg->mapInput("x", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_x, 1, true));
+	cfg->mapInput("y", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_y, 1, true));
 
 	cfg->mapInput("leftbottom", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_RIGHTBRACKET, 1, true));
 	cfg->mapInput("rightbottom", Input(DEVICE_KEYBOARD, TYPE_KEY, SDLK_LEFTBRACKET, 1, true));
 }
-
 void InputManager::writeDeviceConfig(InputConfig* config)
 {
 	assert(initialized());

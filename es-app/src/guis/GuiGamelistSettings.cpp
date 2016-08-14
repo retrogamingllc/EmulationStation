@@ -86,9 +86,9 @@ GuiGamelistSettings::~GuiGamelistSettings()
 
 		int saveinfo = SystemData::saveConfig();
 
-        if(saveinfo < 0){
-            LOG(LogInfo) << "Error Saving  Configs";
-        }
+		if(saveinfo < 0) {
+			LOG(LogInfo) << "Error Saving  Configs";
+		}
 
 		// Reload if user hit save&apply
 		if (mSaveLevel > 1) {

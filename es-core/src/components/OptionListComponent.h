@@ -228,6 +228,7 @@ public:
 	{
 		assert(mMultiSelect == false);
 		auto selected = getSelectedObjects();
+
 		assert(selected.size() == 1);
 		return selected.at(0);
 	}

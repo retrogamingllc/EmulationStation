@@ -6,6 +6,7 @@
 
 #include "GuiComponent.h"
 #include "Renderer.h"
+#include "Log.h"
 
 enum CursorState {
 	CURSOR_STOPPED,

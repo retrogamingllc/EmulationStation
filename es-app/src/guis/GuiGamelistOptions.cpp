@@ -10,10 +10,15 @@
 #include "SystemData.h"
 #include "Log.h"
 
+#include "Settings.h"
+#include "guis/GuiSettings.h"
+#include "FileData.h"
+
 GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window),
 	mMenu(window, "OPTIONS"),
 	mSystem(system)
 {
+	LOG(LogDebug) << "GUIGamelistOptions::GuiGamelistOptions()";
 	addChild(&mMenu);
 
 	// jump to letter
@@ -41,6 +46,17 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 	};
 	mMenu.addRow(row);
 
+	row.elements.clear();
+	row.addElement(std::make_shared<TextComponent>(mWindow, "SURPRISE ME!", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	row.input_handler = [&](InputConfig* config, Input input) {
+		if(config->isMappedTo("a", input) && input.value) {
+			SurpriseMe();
+			return true;
+		}
+		return false;
+	};
+	mMenu.addRow(row);
+
 	// sort list by
 	mListSort = std::make_shared<SortList>(mWindow, "SORT GAMES BY", false);
 	for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++) {
@@ -50,12 +66,45 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 
 	mMenu.addWithLabel("SORT GAMES BY", mListSort);
 
-	// edit game metadata
-	row.elements.clear();
-	row.addElement(std::make_shared<TextComponent>(mWindow, "EDIT THIS GAME'S METADATA", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
-	row.addElement(makeArrow(mWindow), false);
-	row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::openMetaDataEd, this));
-	mMenu.addRow(row);
+	// Show favorites-only
+	auto favorite_only = std::make_shared<SwitchComponent>(mWindow);
+	favorite_only->setState(Settings::getInstance()->getBool("FavoritesOnly"));
+	mMenu.addWithLabel("FAVORITES ONLY", favorite_only);
+	addSaveFunc([favorite_only, this] {
+		if(favorite_only->getState())
+		{
+			bool filterHidden = ((Settings::getInstance()->getString("UIMode") == "Kiosk") ||
+			(Settings::getInstance()->getString("UIMode") == "Kid"));
+			bool filterKid = (Settings::getInstance()->getString("UIMode") == "Kid");
+			bool hasFavorite = false;
+
+			// check if there is anything at all to show, otherwise revert
+			for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++) {
+				if( (*it)->getGameCount(filterHidden, favorite_only->getState(), filterKid) > 0 ) {
+					hasFavorite = true;
+					break;
+				}
+			}
+			if(!hasFavorite) {
+				LOG(LogDebug) << "Nothing to show in selected favorites mode, resetting";
+				favorite_only->setState(false);
+			}
+		}
+		if(favorite_only->getState() != Settings::getInstance()->getBool("FavoritesOnly"))
+		{
+			Settings::getInstance()->setBool("FavoritesOnly", favorite_only->getState());
+			mFavoriteStateChanged = true;
+		}
+	});
+
+	// edit game metadata - only in Full UI mode
+	if(Settings::getInstance()->getString("UIMode") == "Full") {
+		row.elements.clear();
+		row.addElement(std::make_shared<TextComponent>(mWindow, "EDIT THIS GAME'S METADATA", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+		row.addElement(makeArrow(mWindow), false);
+		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::openMetaDataEd, this));
+		mMenu.addRow(row);
+	}
 
 	// --- SYSTEM UI SETTINGS ---
 	row.elements.clear();
@@ -82,16 +131,24 @@ GuiGamelistOptions::~GuiGamelistOptions()
 	root->sort(*mListSort->getSelected()); // will also recursively sort children
 
 	// notify that the root folder was sorted
+
 	getGamelist()->onFileChanged(root, FILE_SORTED);
 
 	// save things
 	int saveinfo = SystemData::saveConfig();
-      // Save system to writeable config file.  returns 0 on success, 1 = reload gamelist; 2=reload systemview; -x=errors
-    if(saveinfo < 0){
-        LOG(LogInfo) << "Error Saving  Configs";
-    }
+
+	// Save system to writeable config file.  returns 0 on success, 1 = reload gamelist; 2=reload systemview; -x=errors
+	if(saveinfo < 0) {
+		LOG(LogInfo) << "Error Saving  Configs";
+	}
 
 
+	if (mFavoriteStateChanged) {
+		LOG(LogDebug) << "  GUIGamelistOptions::~GuiGamelistOptions(): FavoriteStateChanged, reloading GameList";
+		ViewController::get()->setAllInvalidGamesList(getGamelist()->getCursor()->getSystem());
+		//ViewController::get()->reloadGameListView(getGamelist()->getCursor()->getSystem());
+		ViewController::get()->reloadAll();
+	}
 }
 
 void GuiGamelistOptions::openMetaDataEd()
@@ -146,6 +203,7 @@ void GuiGamelistOptions::jumpToLetter()
 bool GuiGamelistOptions::input(InputConfig* config, Input input)
 {
 	if((config->isMappedTo("b", input) || config->isMappedTo("select", input)) && input.value) {
+		save();
 		delete this;
 		return true;
 	}
@@ -163,4 +221,25 @@ std::vector<HelpPrompt> GuiGamelistOptions::getHelpPrompts()
 IGameListView* GuiGamelistOptions::getGamelist()
 {
 	return ViewController::get()->getGameListView(mSystem).get();
+}
+
+void GuiGamelistOptions::save()
+{
+	if (!mSaveFuncs.size()) {
+		return;
+	}
+
+	for (auto it = mSaveFuncs.begin(); it != mSaveFuncs.end(); it++) {
+		(*it)();
+	}
+
+	Settings::getInstance()->saveFile();
+}
+
+void GuiGamelistOptions::SurpriseMe()
+{
+	LOG(LogDebug) << "GuiGamelistOptions::SurpriseMe()";
+	bool filterKid = (Settings::getInstance()->getString("UIMode") == "Kid");
+	ViewController::get()->goToRandomGame(true, false, filterKid);
+	delete this;
 }

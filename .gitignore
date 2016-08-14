@@ -36,3 +36,8 @@ Makefile
 
 # .idea
 .idea
+
+#Netbeans files
+nbproject
+*.orig
+nbproject/private/private.xml
