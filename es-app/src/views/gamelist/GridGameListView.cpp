@@ -10,13 +10,10 @@
 // Part of this was written by Aloshi but was never finished and added to ES. 
 // It would originally load all game art at ES load and could easily eat up
 // All VRAM in smaller systems, such as the raspberry pi.
-// I've added a half-baked way of loading game art into the image grid by doing
-// it only when the user is in that system's game list and it'll do it frame
-// by frame to not eat up CPU cycles for a couple seconds.  This saves VRAM
-// but big game lists can still eat it all up and will result in all kinds
-// of problems.  A solution to fix that would to probably add an option when
-// scrapping to save in smaller resolutions or have this class shrink images
-// as they're being loaded in.
+// I've changed how ImageGridComponent stores the game's art texture so
+// it will only load the images for tiles in a range of the cursor and
+// unload textures outside of its range depending on which direction the
+// user is moving.
 // ============================================================================
 
 GridGameListView::GridGameListView(Window* window, SystemData* system) : ISimpleGameListView(window, system->getRootFolder()),
@@ -34,8 +31,6 @@ GridGameListView::GridGameListView(Window* window, SystemData* system) : ISimple
 	addChild(&mGrid);
 
 	mSystem = system;
-
-	//updateLoadRange();
 
 	populateList(system->getRootFolder()->getChildren());
 }

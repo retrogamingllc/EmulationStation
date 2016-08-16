@@ -168,8 +168,10 @@ public:
 
 	// Sets this image back to default texture.
 	void clearImage(int index) {
-		mEntries[index].data.texture = TextureResource::get(":/frame.png");
-		mEntries[index].isTextureLoaded = false;
+		if (mEntries[index].isTextureLoaded) {
+			mEntries[index].data.texture = TextureResource::get(":/frame.png");
+			mEntries[index].isTextureLoaded = false;
+		}
 	}
 	
 	// entry management

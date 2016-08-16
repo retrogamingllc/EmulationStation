@@ -11,6 +11,20 @@ struct ImageGridData
 	std::shared_ptr<TextureResource> texture;
 };
 
+// Keeps track of which direction the user is moving.  ( for dynamic loading )
+enum UserDirection 
+{
+	MOVING_UP,
+	MOVING_DOWN
+};
+
+// A range around the cursor's index used for loading in textures
+struct CursorRange {
+	int min = 0;
+	int max = 12;
+	int length = 0;
+};
+
 template<typename T>
 class ImageGridComponent : public IList<ImageGridData, T>
 {
@@ -116,10 +130,13 @@ private:
 
 	float mGridMod = 1;
 
-	int mCursorRangeMin = 0;
-	int mCursorRangeMax = 12;
-	int mCurrentLoad = 0;
-	bool bLoading = false;
+	CursorRange mCursorRange;	
+	int mCurrentLoad = 0;			// The current loaded in texture
+	bool bLoading = false;			// Loading in textures in the cursor range.
+	bool bUnloaded = false;			// No longer loading and just finished unloading old textures.
+
+	int mPrevIndex = 0;
+	int mCurrentDirection = MOVING_DOWN;
 
 	std::vector<ImageComponent> mImages;
 };
@@ -171,20 +188,51 @@ void ImageGridComponent<T>::add(const std::string& name, const std::string& imag
 template<typename T>
 void ImageGridComponent<T>::dynamicImageLoader() {
 	if (bLoading) {
+		// Load image
 		static_cast<IList <ImageGridData, T >*>(this)->loadTexture(mCurrentLoad);
 
 		// update images as they load in.
 		updateImages();
 
-		if (mCurrentLoad < mCursorRangeMax) mCurrentLoad++;
+		if (mCurrentLoad < mCursorRange.max) mCurrentLoad++;
 		else bLoading = false;
 	}
+	else
+	{
+		if (bUnloaded) return;
+
+		// Unload images that are out of range in the opposite direction the user is going
+		switch (mCurrentDirection) {
+		case MOVING_DOWN:
+			if (mCursorRange.min > 0) {
+				for (int i = 0; i < mCursorRange.min; i++) {
+					clearImageAt(i);
+				}
+			}
+			break;
+
+		case MOVING_UP:
+			if (mCursorRange.max < mTotalEntrys) {
+				for (int i = mTotalEntrys - 1; i > mCursorRange.max; i--) {
+					clearImageAt(i);
+				}
+			}
+			break;
+		}
+
+		bUnloaded = true;
+
+	}
+
 }
 
 template<typename T>
 void ImageGridComponent<T>::updateLoadRange() {
 	// Create a range based on cursor position
 	int cursor = getCursorIndex();
+
+	// return if index hasn't changed and range is setup
+	if (cursor == mPrevIndex && mCursorRange.length > 0) return;
 
 	// Get minimum [ will stay at 0 until user moves past 10. ]
 	int rmin = cursor - 10;
@@ -197,11 +245,19 @@ void ImageGridComponent<T>::updateLoadRange() {
 	// if there is only one game, set range 0-0
 	if (mTotalEntrys == 1) rmax = 0;
 
-	mCursorRangeMin = rmin;
-	mCursorRangeMax = rmax;
+	mCursorRange.min = rmin;
+	mCursorRange.max = rmax;
+	mCursorRange.length = rmax - rmin;
 
-	mCurrentLoad = mCursorRangeMin;
+	mCurrentLoad = mCursorRange.min;
 	bLoading = true;
+
+	// Determin user's direction
+	if (mPrevIndex > cursor) mCurrentDirection = MOVING_UP;
+	else mCurrentDirection = MOVING_DOWN;
+	bUnloaded = false;
+	mPrevIndex = cursor;
+
 }
 
 template<typename T>
