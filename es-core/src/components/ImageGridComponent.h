@@ -35,7 +35,7 @@ public:
 
 	void remove();
 
-	void add(const std::string& name, const std::string& imagePath, const T& obj);
+	void add(const std::string& name, const std::string& imagePath, const T& obj, bool loadTextureNow = true);
 	
 	void onSizeChanged() override;
 	
@@ -47,6 +47,10 @@ public:
 
 	int getEntryCount();
 	int getCursorIndex();
+
+	void dynamicImageLoader();
+	void clearImageAt(int index);
+	void updateLoadRange();
 
 private:
 	Eigen::Vector2f getSquareSize(std::shared_ptr<TextureResource> tex = nullptr) const
@@ -112,6 +116,11 @@ private:
 
 	float mGridMod = 1;
 
+	int mCursorRangeMin = 0;
+	int mCursorRangeMax = 12;
+	int mCurrentLoad = 0;
+	bool bLoading = false;
+
 	std::vector<ImageComponent> mImages;
 };
 
@@ -146,16 +155,58 @@ void ImageGridComponent<T>::remove() {
 }
 
 template<typename T>
-void ImageGridComponent<T>::add(const std::string& name, const std::string& imagePath, const T& obj)
+void ImageGridComponent<T>::add(const std::string& name, const std::string& imagePath, const T& obj, bool loadTextureNow)
 {
 	typename IList<ImageGridData, T>::Entry entry;
 	entry.name = name;
 	entry.object = obj;
 	entry.strdata = imagePath;
-	entry.data.texture = ResourceManager::getInstance()->fileExists(imagePath) ? TextureResource::get(imagePath) : TextureResource::get(":/blank_game.png");
+	if (loadTextureNow) entry.data.texture = ResourceManager::getInstance()->fileExists(imagePath) ? TextureResource::get(imagePath) : TextureResource::get(":/blank_game.png");
+	else entry.data.texture = TextureResource::get(":/frame.png");
 	static_cast<IList< ImageGridData, T >*>(this)->add(entry);
 	mEntriesDirty = true;
 	mTotalEntrys++;
+}
+
+template<typename T>
+void ImageGridComponent<T>::dynamicImageLoader() {
+	if (bLoading) {
+		static_cast<IList <ImageGridData, T >*>(this)->loadTexture(mCurrentLoad);
+
+		// update images as they load in.
+		updateImages();
+
+		if (mCurrentLoad < mCursorRangeMax) mCurrentLoad++;
+		else bLoading = false;
+	}
+}
+
+template<typename T>
+void ImageGridComponent<T>::updateLoadRange() {
+	// Create a range based on cursor position
+	int cursor = getCursorIndex();
+
+	// Get minimum [ will stay at 0 until user moves past 10. ]
+	int rmin = cursor - 10;
+	if (rmin < 0) rmin += rmin * -1;
+
+	// get max [ will try to be just the viewable area based on mod size ]
+	int rmax = cursor + 25 - mGridMod;
+	if (rmax > mTotalEntrys) rmax = mTotalEntrys - 1;
+
+	// if there is only one game, set range 0-0
+	if (mTotalEntrys == 1) rmax = 0;
+
+	mCursorRangeMin = rmin;
+	mCursorRangeMax = rmax;
+
+	mCurrentLoad = mCursorRangeMin;
+	bLoading = true;
+}
+
+template<typename T>
+void ImageGridComponent<T>::clearImageAt(int index) {
+	static_cast<IList <ImageGridData, T >*>(this)->clearImage(index);
 }
 
 template<typename T>
@@ -216,7 +267,7 @@ void ImageGridComponent<T>::render(const Eigen::Affine3f& parentTrans)
 	for(auto it = mImages.begin(); it != mImages.end(); it++)
 	{
 		it->render(trans);
-		if (i > 26) break;
+		if (i > 32) break;
 		i++;
 	}
 
@@ -227,6 +278,7 @@ template<typename T>
 void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 {
 	updateImages();
+	updateLoadRange();
 }
 
 template<typename T>

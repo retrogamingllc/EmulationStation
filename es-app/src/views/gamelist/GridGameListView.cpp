@@ -35,8 +35,9 @@ GridGameListView::GridGameListView(Window* window, SystemData* system) : ISimple
 
 	mSystem = system;
 
-	// Load in just the first game to keep ES from crashing if ReloadAll() is called.
-	InitGrid(system->getRootFolder()->getChildren());
+	//updateLoadRange();
+
+	populateList(system->getRootFolder()->getChildren());
 }
 
 FileData* GridGameListView::getCursor()
@@ -83,25 +84,11 @@ bool GridGameListView::input(InputConfig* config, Input input)
 }
 
 void GridGameListView::update(int deltatime) {
-	// For Loading in game data as the user clicks on the system. 
-	// Loads one game per frame, or if specified to load on frame x.
-	if (mReloading && mLoadFrame >= mLoadFrameKey){
+	// For Loading in game art as the user clicks on the system. 
+	// Loads one per frame, or if specified to load on frame x.
+	if (mLoadFrame >= mLoadFrameKey) {
+		mGrid.dynamicImageLoader();
 		mLoadFrame = 0;
-		if (mNextLoad < mSystem->getGameCount()) {
-			// Load gamelist in until it is up to a specific point, then wait for the user to move further down
-			if (mNextLoad < mGrid.getCursorIndex() + 23 - mSystem->getGridModSize()){
-				auto file = mSystem->getRootFolder()->getChildren();
-				auto it = file.at(mNextLoad);
-
-				mGrid.add(it->getName(), it->getThumbnailPath(), it);
-				mNextLoad++;
-			}
-		}
-		else {
-			mReloading = false;
-			mNeedsRefresh = false;
-			mNextLoad = 0;
-		}
 	}
 
 	mLoadFrame++;
@@ -109,14 +96,11 @@ void GridGameListView::update(int deltatime) {
 
 void GridGameListView::populateList(const std::vector<FileData*>& files)
 {
-	// Sets the bool to load in games in update()
-	if (mNeedsRefresh) {
-		mReloading = true;
-
-		// If grid has some games still in it, continue after them
-		if (mGrid.getEntryCount() > 0) mNextLoad = mGrid.getEntryCount();
-
-		mHeaderText.setColor(0xFFFFFFFF);
+	// Load in gamelist and load in first game's art.
+	int b = 0;
+	for (auto it = files.begin(); it != files.end(); it++) {
+		mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it, b == 0);
+		b++;
 	}
 }
 
@@ -168,15 +152,13 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 
 void GridGameListView::onFocusGained() {
-	populateList(mSystem->getRootFolder()->getChildren());
-	
+	mGrid.updateLoadRange();
 }
 
 void GridGameListView::onFocusLost() {
-	while (mGrid.getEntryCount() > mImageCacheAmount) {
-		mGrid.remove();
+	for (int i = 1; i < mGrid.getEntryCount(); i++) {
+		mGrid.clearImageAt(i);
 	}
-	mNeedsRefresh = true;
 }
 
 
