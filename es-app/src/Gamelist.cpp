@@ -142,8 +142,7 @@ void addFileDataNode(pugi::xml_node& parent, const FileData* file, const char* t
 	pugi::xml_node newNode = parent.append_child(tag);
 
 	//write metadata
-	//file->metadata.appendToXML(newNode, true, system->getStartPath());
-	file->metadata.appendToXML(newNode, false, system->getStartPath()); // set ignore defaults to false to force writing all values
+	file->metadata.appendToXML(newNode, true, system->getStartPath());
 
 	if(newNode.children().begin() == newNode.child("name") //first element is name
 			&& ++newNode.children().begin() == newNode.children().end() //theres only one element
