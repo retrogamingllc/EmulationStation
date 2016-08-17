@@ -10,18 +10,15 @@
 #include "SystemData.h"
 #include "Settings.h"
 
-// ===========================================================================
+// ---------------------------------------------------------------------------
 // Part of this was written by Aloshi but was never finished and added to ES.
 // It would originally load all game art at ES load and could easily eat up
 // All VRAM in smaller systems, such as the raspberry pi.
-// I've added a half-baked way of loading game art into the image grid by doing
-// it only when the user is in that system's game list and it'll do it frame
-// by frame to not eat up CPU cycles for a couple seconds.  This saves VRAM
-// but big game lists can still eat it all up and will result in all kinds
-// of problems.  A solution to fix that would to probably add an option when
-// scrapping to save in smaller resolutions or have this class shrink images
-// as they're being loaded in.
-// ============================================================================
+// I've changed how ImageGridComponent stores the game's art texture so
+// it will only load the images for tiles in a range of the cursor and
+// unload textures outside of its range depending on which direction the
+// user is moving.
+// ---------------------------------------------------------------------------=
 
 GridGameListView::GridGameListView(Window* window, SystemData* system) :
 	ISimpleGameListView(window, system->getRootFolder()),
@@ -49,8 +46,7 @@ GridGameListView::GridGameListView(Window* window, SystemData* system) :
 
 	mSystem = system;
 
-	// Load in just the first game to keep ES from crashing if ReloadAll() is called.
-	InitGrid(system->getRootFolder()->getChildren());
+	populateList(system->getRootFolder()->getChildren());
 }
 
 FileData* GridGameListView::getCursor()
@@ -97,33 +93,11 @@ bool GridGameListView::input(InputConfig* config, Input input)
 
 void GridGameListView::update(int deltatime)
 {
-	// For Loading in game data as the user clicks on the system.
-	// Loads one game per frame, or if specified to load on frame x.
-	if (mReloading && mLoadFrame >= mLoadFrameKey) {
+	// For Loading in game art as the user clicks on the system.
+	// Loads one per frame, or if specified to load on frame x.
+	if (mLoadFrame >= mLoadFrameKey) {
+		mGrid.dynamicImageLoader();
 		mLoadFrame = 0;
-		if (mNextLoad < mSystem->getGameCount(mFilterHidden, mFilterFav, mFilterKid )) {
-			auto file = mSystem->getRootFolder()->getChildren();
-			auto it = file.at(mNextLoad);
-
-			if (it->metadata.get("hidden").compare("true") != 0) {
-				if (Settings::getInstance()->getBool("FavoritesOnly")) {
-					if (it->metadata.get("favorite").compare("true") == 0) {
-						mGrid.add(it->getName(), it->getThumbnailPath(), it);
-					}
-				} else if(Settings::getInstance()->getString("UIMode") == "Kid") {
-					if (it->metadata.get("kidgame").compare("true") == 0) {
-						mGrid.add(it->getName(), it->getThumbnailPath(), it);
-					}
-				} else {
-					mGrid.add(it->getName(), it->getThumbnailPath(), it);
-				}
-			}
-			mNextLoad++;
-		} else {
-			mReloading = false;
-			mNeedsRefresh = false;
-			mNextLoad = 0;
-		}
 	}
 
 	mLoadFrame++;
@@ -131,16 +105,25 @@ void GridGameListView::update(int deltatime)
 
 void GridGameListView::populateList(const std::vector<FileData*>& files)
 {
-	// Sets the bool to load in games in update()
-	if (mNeedsRefresh) {
-		mReloading = true;
-
-		// If grid has some games still in it, continue after them
-		if (mGrid.getEntryCount() > 0) {
-			mNextLoad = mGrid.getEntryCount();
+	// Load in gamelist and load in first game's art.
+	int b = 0;
+	for (auto it = files.begin(); it != files.end(); it++) {
+		if ((*it)->metadata.get("hidden").compare("true") != 0) {
+			if (Settings::getInstance()->getBool("FavoritesOnly")) {
+				if ((*it)->metadata.get("favorite").compare("true") == 0) {
+					mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it, b == 0);
+					b++;
+				}
+			} else if(Settings::getInstance()->getString("UIMode") == "Kid") {
+				if ((*it)->metadata.get("kidgame").compare("true") == 0) {
+					mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it, b == 0);
+					b++;
+				}
+			} else {
+				mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it, b == 0);
+				b++;
+			}
 		}
-
-		mHeaderText.setColor(0xFFFFFFFF);
 	}
 }
 
@@ -190,16 +173,14 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 void GridGameListView::onFocusGained()
 {
-	populateList(mSystem->getRootFolder()->getChildren());
-
+	mGrid.updateLoadRange();
 }
 
 void GridGameListView::onFocusLost()
 {
-	while (mGrid.getEntryCount() > mImageCacheAmount) {
-		mGrid.remove();
+	for (int i = 1; i < mGrid.getEntryCount(); i++) {
+		mGrid.clearImageAt(i);
 	}
-	mNeedsRefresh = true;
 }
 
 

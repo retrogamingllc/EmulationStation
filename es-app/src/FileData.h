@@ -5,6 +5,7 @@
 #include <boost/filesystem.hpp>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 class SystemData;
 
@@ -50,10 +51,13 @@ public:
 	{
 		return mParent;
 	}
-	inline const std::vector<FileData*>& getChildren() const
+	inline const std::unordered_map<std::string, FileData*>& getChildrenByFilename() const
 	{
-		return mChildren;
+		return mChildrenByFilename;
 	}
+    inline const std::vector<FileData*>& getChildren() const {
+        return mChildren;
+    }
 	inline SystemData* getSystem() const
 	{
 		return mSystem;
@@ -94,5 +98,6 @@ private:
 	boost::filesystem::path mPath;
 	SystemData* mSystem;
 	FileData* mParent;
+	std::unordered_map<std::string,FileData*> mChildrenByFilename;
 	std::vector<FileData*> mChildren;
 };

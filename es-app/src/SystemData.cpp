@@ -214,11 +214,11 @@ void SystemData::populateFolder(FileData* folder)
 			populateFolder(newFolder);
 
 			//ignore folders that do not contain games
-			if(newFolder->getChildren().size() == 0) {
+			if(newFolder->getChildrenByFilename().size() == 0) {
 				delete newFolder;
 			} else {
-				folder->addChild(newFolder);
-			}
+                folder->addChild(newFolder);
+            }
 		}
 	}
 }
@@ -457,7 +457,7 @@ bool SystemData::loadConfig()
 		path = genericPath.generic_string();
 
 		SystemData* newSys = new SystemData(name, fullname, path, extensions, cmd, platformIds, themeFolder, rawtheme, systemEnabled, viewMode, modsize);
-		if(newSys->getRootFolder()->getChildren().size() == 0) {
+		if(newSys->getRootFolder()->getChildrenByFilename().size() == 0) {
 			LOG(LogWarning) << "System \"" << name << "\" has no games! Ignoring it.";
 			delete newSys;
 		} else {

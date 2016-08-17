@@ -52,6 +52,7 @@ public:
 		std::string strdata;
 		UserData object;
 		EntryData data;
+		bool isTextureLoaded = false;
 	};
 
 protected:
@@ -140,6 +141,32 @@ public:
 		}
 
 		return false;
+	}
+
+	int getCursorIndex()
+	{
+		return mCursor;
+	}
+
+	// Will load an object's texture from it's stored texture string.
+	// Can be safely called many times without reloading texture.
+	void loadTexture(int index)
+	{
+		if (!mEntries[index].isTextureLoaded) {
+			std::string imagePath = mEntries[index].strdata;
+			mEntries[index].data.texture = ResourceManager::getInstance()->fileExists(imagePath) ?
+										   TextureResource::get(imagePath) : TextureResource::get(":/blank_game.png");
+			mEntries[index].isTextureLoaded = true;
+		}
+	}
+
+	// Sets this image back to default texture.
+	void clearImage(int index)
+	{
+		if (mEntries[index].isTextureLoaded) {
+			mEntries[index].data.texture = TextureResource::get(":/frame.png");
+			mEntries[index].isTextureLoaded = false;
+		}
 	}
 
 	// entry management

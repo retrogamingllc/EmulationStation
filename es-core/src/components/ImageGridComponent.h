@@ -11,6 +11,19 @@ struct ImageGridData {
 	std::shared_ptr<TextureResource> texture;
 };
 
+// Keeps track of which direction the user is moving.  ( for dynamic loading )
+enum UserDirection {
+	MOVING_UP,
+	MOVING_DOWN
+};
+
+// A range around the cursor's index used for loading in textures
+struct CursorRange {
+	int min = 0;
+	int max = 12;
+	int length = 0;
+};
+
 template<typename T>
 class ImageGridComponent : public IList<ImageGridData, T>
 {
@@ -35,8 +48,7 @@ public:
 
 	void remove();
 
-	void add(const std::string& name, const std::string& imagePath, const T& obj);
-
+	void add(const std::string& name, const std::string& imagePath, const T& obj, bool loadTextureNow = true);
 	void onSizeChanged() override;
 
 	void setModSize(float mod);
@@ -46,6 +58,11 @@ public:
 	void render(const Eigen::Affine3f& parentTrans) override;
 
 	int getEntryCount();
+	int getCursorIndex();
+
+	void dynamicImageLoader();
+	void clearImageAt(int index);
+	void updateLoadRange();
 
 private:
 	Eigen::Vector2f getSquareSize(std::shared_ptr<TextureResource> tex = nullptr) const
@@ -117,6 +134,14 @@ private:
 
 	float mGridMod = 1;
 
+	CursorRange mCursorRange;
+	int mCurrentLoad = 0;			// The current loaded in texture
+	bool bLoading = false;			// Loading in textures in the cursor range.
+	bool bUnloaded = false;			// No longer loading and just finished unloading old textures.
+
+	int mPrevIndex = 0;
+	int mCurrentDirection = MOVING_DOWN;
+
 	std::vector<ImageComponent> mImages;
 };
 
@@ -140,6 +165,12 @@ int ImageGridComponent<T>::getEntryCount()
 }
 
 template<typename T>
+int ImageGridComponent<T>::getCursorIndex()
+{
+	return static_cast<IList< ImageGridData, T >*>(this)->getCursorIndex();
+}
+
+template<typename T>
 void ImageGridComponent<T>::remove()
 {
 	static_cast<IList< ImageGridData, T >*>(this)->pop_back();
@@ -149,16 +180,117 @@ void ImageGridComponent<T>::remove()
 }
 
 template<typename T>
-void ImageGridComponent<T>::add(const std::string& name, const std::string& imagePath, const T& obj)
+void ImageGridComponent<T>::add(const std::string& name, const std::string& imagePath, const T& obj, bool loadTextureNow)
 {
 	typename IList<ImageGridData, T>::Entry entry;
 	entry.name = name;
 	entry.object = obj;
 	entry.strdata = imagePath;
-	entry.data.texture = ResourceManager::getInstance()->fileExists(imagePath) ? TextureResource::get(imagePath) : TextureResource::get(":/blank_game.png");
+	if (loadTextureNow) {
+		entry.data.texture = ResourceManager::getInstance()->fileExists(imagePath) ? TextureResource::get(imagePath) : TextureResource::get(":/blank_game.png");
+	} else {
+		entry.data.texture = TextureResource::get(":/frame.png");
+	}
 	static_cast<IList< ImageGridData, T >*>(this)->add(entry);
 	mEntriesDirty = true;
 	mTotalEntrys++;
+}
+
+template<typename T>
+void ImageGridComponent<T>::dynamicImageLoader()
+{
+	if (bLoading) {
+		// Load image
+		static_cast<IList <ImageGridData, T >*>(this)->loadTexture(mCurrentLoad);
+
+		// update images as they load in.
+		updateImages();
+
+		if (mCurrentLoad < mCursorRange.max) {
+			mCurrentLoad++;
+		} else {
+			bLoading = false;
+		}
+	} else {
+		if (bUnloaded) {
+			return;
+		}
+
+		// Unload images that are out of range in the opposite direction the user is going
+		switch (mCurrentDirection) {
+		case MOVING_DOWN:
+			if (mCursorRange.min > 0) {
+				for (int i = 0; i < mCursorRange.min; i++) {
+					clearImageAt(i);
+				}
+			}
+			break;
+
+		case MOVING_UP:
+			if (mCursorRange.max < mTotalEntrys) {
+				for (int i = mTotalEntrys - 1; i > mCursorRange.max; i--) {
+					clearImageAt(i);
+				}
+			}
+			break;
+		}
+
+		bUnloaded = true;
+
+	}
+
+}
+
+template<typename T>
+void ImageGridComponent<T>::updateLoadRange()
+{
+	// Create a range based on cursor position
+	int cursor = getCursorIndex();
+
+	// return if index hasn't changed and range is setup
+	if (cursor == mPrevIndex && mCursorRange.length > 0) {
+		return;
+	}
+
+	// Get minimum [ will stay at 0 until user moves past 10. ]
+	int rmin = cursor - 10;
+	if (rmin < 0) {
+		rmin += rmin * -1;
+	}
+
+	// get max [ will try to be just the viewable area based on mod size ]
+	int rmax = cursor + 25 - mGridMod;
+	if (rmax > mTotalEntrys) {
+		rmax = mTotalEntrys - 1;
+	}
+
+	// if there is only one game, set range 0-0
+	if (mTotalEntrys == 1) {
+		rmax = 0;
+	}
+
+	mCursorRange.min = rmin;
+	mCursorRange.max = rmax;
+	mCursorRange.length = rmax - rmin;
+
+	mCurrentLoad = mCursorRange.min;
+	bLoading = true;
+
+	// Determin user's direction
+	if (mPrevIndex > cursor) {
+		mCurrentDirection = MOVING_UP;
+	} else {
+		mCurrentDirection = MOVING_DOWN;
+	}
+	bUnloaded = false;
+	mPrevIndex = cursor;
+
+}
+
+template<typename T>
+void ImageGridComponent<T>::clearImageAt(int index)
+{
+	static_cast<IList <ImageGridData, T >*>(this)->clearImage(index);
 }
 
 template<typename T>
@@ -216,7 +348,7 @@ void ImageGridComponent<T>::render(const Eigen::Affine3f& parentTrans)
 	int i = 0;
 	for(auto it = mImages.begin(); it != mImages.end(); it++) {
 		it->render(trans);
-		if (i > 26) {
+		if (i > 32) {
 			break;
 		}
 		i++;
@@ -229,6 +361,7 @@ template<typename T>
 void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 {
 	updateImages();
+	updateLoadRange();
 }
 
 template<typename T>
