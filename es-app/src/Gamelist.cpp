@@ -10,13 +10,18 @@
 
 namespace fs = boost::filesystem;
 
-FileData* findOrCreateFile(SystemData* system, const boost::filesystem::path& path, FileType type)
+FileData* findOrCreateFile(SystemData* system, const boost::filesystem::path& path, FileType type, bool trustGamelist)
 {
 	// first, verify that path is within the system's root folder
 	FileData* root = system->getRootFolder();
 
+	fs::path relative;
 	bool contains = false;
-	fs::path relative = removeCommonPath(path, root->getPath(), contains);
+	if (trustGamelist) {
+		relative = removeCommonPathUsingStrings(path, root->getPath(), contains);
+	} else {
+		relative = removeCommonPath(path, root->getPath(), contains);
+	}
 	if(!contains) {
 		LOG(LogError) << "File path \"" << path << "\" is outside system path \"" << system->getStartPath() << "\"";
 		return NULL;
@@ -26,14 +31,12 @@ FileData* findOrCreateFile(SystemData* system, const boost::filesystem::path& pa
 	FileData* treeNode = root;
 	bool found = false;
 	while(path_it != relative.end()) {
-		const std::vector<FileData*>& children = treeNode->getChildren();
-		found = false;
-		for(auto child_it = children.begin(); child_it != children.end(); child_it++) {
-			if((*child_it)->getPath().filename() == *path_it) {
-				treeNode = *child_it;
-				found = true;
-				break;
-			}
+		const std::unordered_map<std::string, FileData*>& children = treeNode->getChildrenByFilename();
+
+		std::string key = path_it->string();
+		found = children.find(key) != children.end();
+		if (found) {
+			treeNode = children.at(key);
 		}
 
 		// this is the end
@@ -74,6 +77,7 @@ FileData* findOrCreateFile(SystemData* system, const boost::filesystem::path& pa
 
 void parseGamelist(SystemData* system)
 {
+	bool trustGamelist = Settings::getInstance()->getBool("ParseGamelistOnly");
 	std::string xmlpath = system->getGamelistPath(false);
 
 	if(!boost::filesystem::exists(xmlpath)) {
@@ -109,12 +113,12 @@ void parseGamelist(SystemData* system)
 		for(pugi::xml_node fileNode = root.child(tag); fileNode; fileNode = fileNode.next_sibling(tag)) {
 			fs::path path = resolvePath(fileNode.child("path").text().get(), relativeTo, false);
 
-			if(!boost::filesystem::exists(path)) {
+			if(!trustGamelist && !boost::filesystem::exists(path)) {
 				LOG(LogWarning) << "File \"" << path << "\" does not exist! Ignoring.";
 				continue;
 			}
 
-			FileData* file = findOrCreateFile(system, path, type);
+			FileData* file = findOrCreateFile(system, path, type, trustGamelist);
 			if(!file) {
 				LOG(LogError) << "Error finding/creating FileData for \"" << path << "\", skipping.";
 				continue;
@@ -138,8 +142,7 @@ void addFileDataNode(pugi::xml_node& parent, const FileData* file, const char* t
 	pugi::xml_node newNode = parent.append_child(tag);
 
 	//write metadata
-	//file->metadata.appendToXML(newNode, true, system->getStartPath());
-	file->metadata.appendToXML(newNode, false, system->getStartPath()); // set ignore defaults to false to force writing all values
+	file->metadata.appendToXML(newNode, true, system->getStartPath());
 
 	if(newNode.children().begin() == newNode.child("name") //first element is name
 			&& ++newNode.children().begin() == newNode.children().end() //theres only one element

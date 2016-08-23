@@ -50,11 +50,9 @@ protected:
 
 	SystemData* mSystem;
 
-	bool mNeedsRefresh = true;
-	bool mReloading = true;
-	unsigned int mNextLoad = 0;
+	int mNextLoad = 0;
 	int mLoadFrame = 0;
-	int mLoadFrameKey = 4;
+	int mLoadFrameKey = 3;
 
 private:
 	bool mFavoriteChange;
