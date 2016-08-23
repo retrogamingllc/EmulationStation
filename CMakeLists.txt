@@ -45,13 +45,22 @@ endif()
 find_package(Freetype REQUIRED)
 find_package(FreeImage REQUIRED)
 find_package(SDL2 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system filesystem date_time locale)
 find_package(Eigen3 REQUIRED)
 find_package(CURL REQUIRED)
 
 #add ALSA for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     find_package(ALSA REQUIRED)
+endif()
+
+#Set up Boost
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package( Boost  COMPONENTS date_time locale filesystem system REQUIRED )
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 #-------------------------------------------------------------------------------
@@ -71,6 +80,7 @@ if(MSVC)
     set(CMAKE_DEBUG_POSTFIX "d")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+    add_definitions(-DFREEIMAGE_LIB)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") #multi-processor compilation
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP") #multi-processor compilation
 else()
