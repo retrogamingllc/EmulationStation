@@ -9,8 +9,8 @@
 #include "SystemData.h"
 #include "FileData.h"
 
-GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window), 
-	mSystem(system), 
+GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window),
+	mSystem(system),
 	mMenu(window, "OPTIONS")
 {
 	
@@ -54,7 +54,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 		return false;
 	};
 	mMenu.addRow(row);
-	
+
 	// sort list by
 	std::shared_ptr<SortList> list_sorts = std::make_shared<SortList>(mWindow, "SORT GAMES BY", false);
 	for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++)
@@ -62,6 +62,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 		const FileData::SortType& sort = FileSorts::SortTypes.at(i);
 		list_sorts->add(sort.description, &sort, Settings::getInstance()->getString("SortMode") == sort.description);
 	}
+
 	mMenu.addWithLabel("SORT GAMES BY", list_sorts);
 	addSaveFunc([list_sorts, this]{
 		LOG(LogDebug) << "GUIGamelistOptions::GuiGamelistOptions(): Sort type save function";
@@ -75,7 +76,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 		}
 		LOG(LogDebug) << "GUIGamelistOptions::GuiGamelistOptions(): Sort type save function: end";
 	});
-	
+
 	// Toggle: Show favorites-only
 	auto favorite_only = std::make_shared<SwitchComponent>(mWindow);
 	favorite_only->setState(Settings::getInstance()->getBool("FavoritesOnly"));
@@ -90,7 +91,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 			if(! mSystem->isValidFilter()) // check if there is anything at all to show, otherwise revert
 			{
 				LOG(LogDebug) << "Nothing to show in selected favorites mode, resetting";
-				favorite_only->setState(false);			
+				favorite_only->setState(false);
 				Settings::getInstance()->setBool("FavoritesOnly", favorite_only->getState());
 			} else
 			{
@@ -109,7 +110,39 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 		LOG(LogDebug) << "GUIGamelistOptions::GuiGamelistOptions(): toggle favoritesView save function: end";
 
 	});
-	
+
+	// Toggle: Show hidden
+	if(Settings::getInstance()->getString("UIMode") == "Full")
+	{
+		auto show_hidden = std::make_shared<SwitchComponent>(mWindow);
+		show_hidden->setState(Settings::getInstance()->getBool("ShowHidden"));
+		mMenu.addWithLabel("SHOW HIDDEN", show_hidden);
+		addSaveFunc([show_hidden, this] {
+			// First save to settings, in order for filtering to work
+			if(show_hidden->getState() != Settings::getInstance()->getBool("ShowHidden"))
+			{
+				Settings::getInstance()->setBool("ShowHidden", show_hidden->getState());
+				mHiddenStateChanged = true;
+			}
+			if(!show_hidden->getState())
+			{
+				bool hasNonHidden = false;
+				for(auto it = SystemData::sSystemVector.begin(); it != SystemData::sSystemVector.end(); it++) {
+					if( (*it)->getGameCount(true) > 0 ) {
+						hasNonHidden = true;
+						break;
+					}
+				}
+				if(!hasNonHidden)
+				{
+					LOG(LogDebug) << "Nothing to show in selected show hidden mode, resetting";
+					show_hidden->setState(true);
+					Settings::getInstance()->setBool("ShowHidden", show_hidden->getState());
+				}
+			}
+		});
+	}
+
 	// edit game metadata - only in Full UI mode
 	if(Settings::getInstance()->getString("UIMode") == "Full")
 	{
@@ -137,8 +170,8 @@ void GuiGamelistOptions::openMetaDataEd()
 	ScraperSearchParams p;
 	p.game = file;
 	p.system = file->getSystem();
-	mWindow->pushGui(new GuiMetaDataEd(mWindow, &file->metadata, file->metadata.getMDD(), p, file->getPath().filename().string(), 
-		std::bind(&IGameListView::onFileChanged, getGamelist(), file, FILE_METADATA_CHANGED), [this, file] { 
+	mWindow->pushGui(new GuiMetaDataEd(mWindow, &file->metadata, file->metadata.getMDD(), p, file->getPath().filename().string(),
+		std::bind(&IGameListView::onFileChanged, getGamelist(), file, FILE_METADATA_CHANGED), [this, file] {
 			getGamelist()->remove(file);
 	}));
 	
@@ -154,6 +187,7 @@ void GuiGamelistOptions::jumpToLetter()
 	// this is a really shitty way to get a list of files
 	const std::vector<FileData*>& files = gamelist->getCursor()->getParent()->getChildren(true);
 	LOG(LogDebug) << "GUIGameslistOptions:JumpToLetter, Calling: FileData::getChildren(filtered), retrieving "<< files.size() << "items";
+
 
 	long min = 0;
 	long max = files.size() - 1;
@@ -188,7 +222,7 @@ bool GuiGamelistOptions::input(InputConfig* config, Input input)
 	{
 		save();
 		delete this;
-		return true;		
+		return true;
 	}
 
 	return mMenu.input(config, input);
