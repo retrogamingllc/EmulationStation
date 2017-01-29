@@ -48,8 +48,12 @@ void ISimpleGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme
 void ISimpleGameListView::onFileChanged(FileData* file, FileChangeType change)
 {
 	// we could be tricky here to be efficient;
-	// but this shouldn't happen very often so we'll just always repopulate
+	// but this shouldn't happen very often so we'll just always repopulate.
+	
+	LOG(LogDebug) << "ISimpleGameLIstView::onFileChanged()";
+
 	FileData* cursor = getCursor();
+	LOG(LogDebug) << "ISimpleGameListView::onFileChanged, Calling: FileData::getChildren(filtered)";
 	populateList(cursor->getParent()->getChildren(true));
 	setCursor(cursor);
 }
@@ -68,19 +72,25 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				launch(cursor);
 			}else{
 				// it's a folder
+				LOG(LogDebug) << "ISimpleGameListView::input, Calling: FileData::getChildren(filtered)";
 				if(cursor->getChildren(true).size() > 0)
 				{
+					LOG(LogDebug) << "  cursor->getChildren(true).size() = " << cursor->getChildren(true).size();
 					mCursorStack.push(cursor);
+					LOG(LogDebug) << "  cursor push succesfull";
+
 					populateList(cursor->getChildren(true));
 				}
 			}
-				
+			LOG(LogDebug) << "ISimpleGameListView::input(): a button action end.";
 			return true;
 		}else if(config->isMappedTo("b", input))
 		{
 			LOG(LogDebug) << "ISimpleGameListView::input(): b detected!";
+			
 			if(mCursorStack.size())
 			{
+				LOG(LogDebug) << "   current mCursorStack has size: "<< mCursorStack.size();
 				populateList(mCursorStack.top()->getParent()->getChildren(true));
 				setCursor(mCursorStack.top());
 				mCursorStack.pop();
@@ -95,6 +105,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				}
 				ViewController::get()->goToSystemView(getCursor()->getSystem());
 			}
+			LOG(LogDebug) << "ISimpleGameListView::input(): b button action completed";
 
 			return true;
 		}else if (config->isMappedTo("x", input))

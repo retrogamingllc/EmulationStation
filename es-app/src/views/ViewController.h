@@ -22,6 +22,7 @@ public:
 	// the current gamelist view (as it may change to be detailed).
 	void reloadGameListView(IGameListView* gamelist, bool reloadTheme = false);
 	inline void reloadGameListView(SystemData* system, bool reloadTheme = false) { reloadGameListView(getGameListView(system).get(), reloadTheme); }
+	void reloadSystemListView() const; 
 	void reloadAll(); // Reload everything with a theme.  Used when the "ThemeSet" setting changes.
 	void setInvalidGamesList(SystemData* system);
 	void setAllInvalidGamesList(SystemData* systemExclude);
@@ -38,7 +39,7 @@ public:
 
 	//void updateFavorite(SystemData* system, FileData* file);
 	//void updateKidGame(SystemData* system, FileData* file);
-	void updateView(SystemData* system, FileData* file);
+	//void updateCursor(SystemData* system, FileData* file);
 	
 	// Plays a nice launch effect and launches the game at the end of it.
 	// Once the game terminates, plays a return effect.

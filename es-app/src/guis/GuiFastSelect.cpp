@@ -2,6 +2,8 @@
 #include "ThemeData.h"
 #include "FileSorts.h"
 #include "SystemData.h"
+#include "Log.h"
+
 
 static const std::string LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -142,6 +144,7 @@ void GuiFastSelect::updateGameListSort()
 void GuiFastSelect::updateGameListCursor()
 {
 	const std::vector<FileData*>& list = mGameList->getCursor()->getParent()->getChildren(true);
+	LOG(LogDebug) << "GUIFastSelect::UpdateGameListCursor, Calling: FileData::getChildren(filtered), retrieving "<< list.size() << "items";
 
 	// only skip by letter when the sort mode is alphabetical
 	const FileData::SortType& sort = FileSorts::SortTypes.at(mSortId);

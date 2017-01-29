@@ -27,6 +27,8 @@ FileData* findOrCreateFile(SystemData* system, const boost::filesystem::path& pa
 	while(path_it != relative.end())
 	{
 		const std::vector<FileData*>& children = treeNode->getChildren();
+		//LOG(LogDebug) << "findOrCreateFile, Calling: FileData::getChildren(UNfiltered), retrieving "<< children.size() << " items";
+
 		found = false;
 		for(auto child_it = children.begin(); child_it != children.end(); child_it++)
 		{

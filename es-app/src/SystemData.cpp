@@ -14,6 +14,7 @@
 #include "FileSorts.h"
 
 std::vector<SystemData*> SystemData::sSystemVector;
+std::vector<SystemData*> SystemData::sFilteredSystemVector;
 
 namespace fs = boost::filesystem;
 
@@ -198,6 +199,7 @@ void SystemData::populateFolder(FileData* folder)
 			populateFolder(newFolder);
 
 			//ignore folders that do not contain games
+			LOG(LogDebug) << "SystemData::populateFolder, Calling: FileData::getChildren(UNfiltered), testing for existence of items";
 			if(newFolder->getChildren().size() == 0)
 				delete newFolder;
 			else
@@ -311,6 +313,8 @@ bool SystemData::loadConfig()
 		path = genericPath.generic_string();
 
 		SystemData* newSys = new SystemData(name, fullname, path, extensions, cmd, platformIds, themeFolder);
+		
+		LOG(LogDebug) << "SystemData::loadConfig, Calling: FileData::getChildren(UNfiltered), testing for existence of items";
 		if(newSys->getRootFolder()->getChildren().size() == 0)
 		{
 			LOG(LogWarning) << "System \"" << name << "\" has no games! Ignoring it.";
@@ -475,4 +479,23 @@ SystemData* SystemData::getRandom() const
 	LOG(LogDebug) << "   Picked system: " << validSystems.at(k)->getFullName();
     
 	return validSystems.at(k);
+}
+
+// This function returns true when there is at least a single system with a valid item.
+bool SystemData::isValidFilter() const
+{
+	LOG(LogDebug) << "SystemData::isValidFilter()";
+	bool found = false;
+				
+	for(auto it = sSystemVector.begin(); it != sSystemVector.end(); it++) {
+		if( (*it)->getGameCount(true) > 0 ) {
+			found = true;
+			LOG(LogDebug) << "  Valid system found!";
+			break;
+		}
+	}
+	if (!found){
+		LOG(LogDebug) << "  No valid system found.";
+	}
+	return found;
 }

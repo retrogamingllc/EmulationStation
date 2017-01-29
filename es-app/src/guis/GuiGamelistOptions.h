@@ -32,10 +32,10 @@ private:
 	std::shared_ptr<LetterList> mJumpToLetterList;
 	
 	typedef OptionListComponent<const FileData::SortType*> SortList;
-	std::shared_ptr<SortList> mListSort;
+	//std::shared_ptr<SortList> mListSort;
 
 	std::shared_ptr<SwitchComponent> mFavoriteOption;
-	bool mFavoriteStateChanged;
+	bool mViewStateChanged;
 
 	typedef OptionListComponent<std::string> SurpriseEnums;
 	std::shared_ptr<SurpriseEnums> mSurpriseModes;

@@ -10,7 +10,8 @@ GridGameListView::GridGameListView(Window* window, FileData* root) : ISimpleGame
 	mGrid.setPosition(0, mSize.y() * 0.2f);
 	mGrid.setSize(mSize.x(), mSize.y() * 0.8f);
 	addChild(&mGrid);
-
+	
+	LOG(LogDebug) << "GridGameListView::GridGameListView, Calling: FileData::getChildren(UNfiltered)";
 	populateList(root->getChildren());
 }
 
@@ -23,6 +24,7 @@ void GridGameListView::setCursor(FileData* file)
 {
 	if(!mGrid.setCursor(file))
 	{
+		LOG(LogDebug) << "GridGameListView::setCursor, Calling: FileData::getChildren(UNfiltered)";
 		populateList(file->getParent()->getChildren());
 		mGrid.setCursor(file);
 	}

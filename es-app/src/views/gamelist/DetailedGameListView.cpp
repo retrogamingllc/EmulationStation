@@ -262,6 +262,7 @@ void DetailedGameListView::updateInfoPanel()
 			comp->setAnimation(new LambdaAnimation(func, 150), 0, nullptr, fadingOut);
 		}
 	}
+	LOG(LogDebug) << "DetailedGameListView::UpdateInfoPanel():end";
 }
 
 void DetailedGameListView::launch(FileData* game)

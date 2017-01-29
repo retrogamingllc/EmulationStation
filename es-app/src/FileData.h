@@ -18,7 +18,8 @@ enum FileChangeType
 	FILE_ADDED,
 	FILE_METADATA_CHANGED,
 	FILE_REMOVED,
-	FILE_SORTED
+	FILE_SORTED,
+	FILE_FILTERED
 };
 
 // Used for loading/saving gamelist.xml.

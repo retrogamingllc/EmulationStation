@@ -87,20 +87,13 @@ const std::string& FileData::getThumbnailPath() const
 
 std::vector<FileData*> FileData::getChildren(bool filter) const
 {
-	LOG(LogDebug) << "FileData::getChildren(" << filter << ")";
 	std::vector<FileData*> fileList = mChildren;
-	LOG(LogDebug) << "   fileList.size() = " << fileList.size();
-
-	if (filter)
+	if (filter)		//filter out unwanted items from mChildren
 	{
-		//filter out unwanted items from mChildren
-		bool filterHidden = (Settings::getInstance()->getString("UIMode") != "Full");
-		bool filterFav = (Settings::getInstance()->getBool("FavoritesOnly"));
-		bool filterKid = (Settings::getInstance()->getString("UIMode") == "Kid");
-		
-		LOG(LogDebug) << "   filtering (" << filterHidden << filterFav << filterKid << ").";
-		
-		// then filter out all we do not want.
+		bool filterHidden = Settings::getInstance()->getString("UIMode") != "Full";
+		bool filterFav    = Settings::getInstance()->getBool("FavoritesOnly");
+		bool filterKid    = Settings::getInstance()->getString("UIMode") == "Kid";
+
 		if (filterHidden) {
 			fileList = filterFileData(fileList, "hidden", "false");
 		}
@@ -110,9 +103,7 @@ std::vector<FileData*> FileData::getChildren(bool filter) const
 		if (filterKid) {
 			fileList = filterFileData(fileList, "kidgame", "true");
 		}
-
 	}
-	//LOG(LogDebug) << "   returning " << fileList.size() << " files, done.";
 
 	return fileList;
 }
@@ -122,26 +113,24 @@ std::vector<FileData*> FileData::getFilesRecursive(unsigned int typeMask, bool f
 {
 	LOG(LogDebug) << "FileData::getFilesRecursive(" << filter << ")";
 
-	// first populate with all we can find
 	std::vector<FileData*> allfiles = getChildren(filter);
 	std::vector<FileData*> fileList;
 	
-	//LOG(LogDebug) << "FileData::getFilesRecursive(): allfiles contains " << allfiles.size() << " items";
 
 	for(auto it = allfiles.begin(); it != allfiles.end(); it++) 
 	{
+		// test for correct type
 		if((*it)->getType() & typeMask) {
 			fileList.push_back(*it);
 		}
 		
 		if((*it)->getChildren(filter).size() > 1) {
-			//LOG(LogDebug) << "FileData::getFilesRecursive(): Recursing!";
+			LOG(LogDebug) << "FileData::getFilesRecursive(): " << (*it)->getName() <<" has siblings, Recursing!";
 			std::vector<FileData*> subchildren = (*it)->getFilesRecursive(typeMask, filter);
 			fileList.insert(fileList.end(), subchildren.cbegin(), subchildren.cend());
 		}
 	}
 		
-
 	LOG(LogDebug) << "FileData::getFilesRecursive():returning " << fileList.size() << " games";
 	return fileList;
 }
@@ -190,6 +179,8 @@ void FileData::removeChild(FileData* file)
 	assert(false);
 }
 
+// This function recursively sorts the Filelist, based on the selected sort type
+// (See: )
 void FileData::sort(ComparisonFunction& comparator, bool ascending)
 {
 	std::sort(mChildren.begin(), mChildren.end(), comparator);
@@ -197,7 +188,9 @@ void FileData::sort(ComparisonFunction& comparator, bool ascending)
 	for(auto it = mChildren.begin(); it != mChildren.end(); it++)
 	{
 		if((*it)->getChildren().size() > 0)
+		{
 			(*it)->sort(comparator, ascending);
+		}
 	}
 
 	if(!ascending)

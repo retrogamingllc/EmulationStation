@@ -8,7 +8,7 @@
 Settings* Settings::sInstance = NULL;
 
 // these values are NOT saved to es_settings.xml
-// since they're set through command-line arguments, and not the in-program settings menu
+// since they're set through command-line arguments, or otherwise volatile
 std::vector<const char*> settings_dont_save = boost::assign::list_of
 	("Debug")
 	("DebugGrid")
@@ -17,7 +17,8 @@ std::vector<const char*> settings_dont_save = boost::assign::list_of
 	("Windowed")
 	("VSync")
 	("HideConsole")
-	("IgnoreGamelist");
+	("IgnoreGamelist")
+	("FavoritesOnly");
 
 Settings::Settings()
 {
@@ -74,6 +75,7 @@ void Settings::setDefaults()
 	mStringMap["ScreenSaverBehavior"] = "dim";
 	mStringMap["Scraper"] = "TheGamesDB";
 	mStringMap["UIMode"] = "Full";
+	mStringMap["SortMode"] = "filename, ascending";
 		
 	//mStringMap["UIMode_passkey"] = "↑↑↓↓←→←→ba";
 	mStringMap["UIMode_passkey"] = "uuddlrlrba";
@@ -105,6 +107,7 @@ void Settings::saveFile()
 	saveMap<std::string, float>(doc, mFloatMap, "float");
 
 	//saveMap<std::string, std::string>(doc, mStringMap, "string");
+	// @@ Todo: clean up this mess.
 	for(auto iter = mStringMap.begin(); iter != mStringMap.end(); iter++)
 	{
 		pugi::xml_node node = doc.append_child("string");

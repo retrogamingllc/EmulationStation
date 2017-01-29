@@ -15,7 +15,8 @@ BasicGameListView::BasicGameListView(Window* window, FileData* root)
 	mList.setSize(mSize.x(), mSize.y() * 0.8f);
 	mList.setPosition(0, mSize.y() * 0.2f);
 	addChild(&mList);
-
+	
+	LOG(LogDebug) << "BasicGameListView:BasicGameListView, Calling: FileData::getChildren(filtered)";
 	populateList(root->getChildren(true));  // This returns a filtered list based on UImode
 }
 
@@ -28,13 +29,16 @@ void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 {
+	LOG(LogDebug) << "BasicGameListView::onFileChanged()" ;
+	
 	if(change == FILE_METADATA_CHANGED)
 	{
 		// might switch to a detailed view
+		LOG(LogDebug) << "BasicGameListView::onFileChanged(): call ViewController::reloadGameListView()" ;
 		ViewController::get()->reloadGameListView(this);
 		return;
 	}
-
+	
 	ISimpleGameListView::onFileChanged(file, change);
 }
 
@@ -48,6 +52,7 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 
 	// file list can be empty if direct launch item
 	if (files.size()==0) {
+		LOG(LogDebug) << "BasicGameListView::populateList(): The current List is empty!";
 		return;
 	}
 	
@@ -72,6 +77,8 @@ void BasicGameListView::setCursor(FileData* cursor)
 {
 	if(!mList.setCursor(cursor))
 	{
+		LOG(LogDebug) << "BasicGameListView:setCursor, Calling: FileData::getChildren(filtered)";
+
 		populateList(cursor->getParent()->getChildren(true));
 		mList.setCursor(cursor);
 
@@ -107,6 +114,7 @@ void BasicGameListView::remove(FileData *game)
 	boost::filesystem::remove(game->getPath());  // actually delete the file on the filesystem
 	if (getCursor() == game)                     // Select next element in list, or prev if none
 	{
+		LOG(LogDebug) << "BasicGameListView:remove, Calling: FileData::getChildren(filtered)";
 		std::vector<FileData*> siblings = game->getParent()->getChildren(true);
 		auto gameIter = std::find(siblings.begin(), siblings.end(), game);
 		auto gamePos = std::distance(siblings.begin(), gameIter);
